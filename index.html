@@ -49,42 +49,6 @@
         .score-query { background-color: #fef08a; color: #854d0e; border-color: #854d0e; }
         .score-rth { background-color: #fee2e2; color: #991b1b; border-color: #991b1b; }
     </style>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration injected by environment or fallback
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            // Dummy config for fallback if not running in the specific environment
-            projectId: "dummy-project"
-        };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tdmsh-cdi-app';
-        
-        let app, db, auth;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch (e) {
-            console.error("Firebase init error:", e);
-        }
-
-        window.db = db;
-        window.auth = auth;
-        window.appId = appId;
-        
-        // Export needed functions to global scope for UI interactions
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.onSnapshot = onSnapshot;
-        window.deleteDoc = deleteDoc;
-        window.doc = doc;
-        window.serverTimestamp = serverTimestamp;
-        window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
-    </script>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -314,8 +278,6 @@
     <script>
         // Global State
         let audits = [];
-        let currentUser = null;
-        let unsubscribe = null;
 
         // UI Elements
         const form = document.getElementById('auditForm');
@@ -502,72 +464,41 @@
             }, 4000);
         }
 
-        // Initialize App & Firebase Auth
+        // Initialize App
         async function initApp() {
-            if (!window.auth || !window.db) {
-                showToast("Database configuration missing.", "error");
-                tableLoading.classList.add('hidden');
-                connectionStatus.classList.replace('bg-yellow-400', 'bg-red-500');
-                connectionText.textContent = "Offline Mode";
-                return;
-            }
+            // Update UI connection status
+            connectionStatus.classList.replace('bg-yellow-400', 'bg-green-400');
+            connectionStatus.classList.remove('animate-pulse');
+            connectionText.textContent = "Connected to Google Sheets";
 
-            try {
-                // Auth required before any Firestore operations
-                let userCredential;
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    userCredential = await window.signInWithCustomToken(window.auth, __initial_auth_token);
-                } else {
-                    userCredential = await window.signInAnonymously(window.auth);
-                }
-                
-                currentUser = userCredential.user;
-                
-                // Update UI connection status
-                connectionStatus.classList.replace('bg-yellow-400', 'bg-green-400');
-                connectionStatus.classList.remove('animate-pulse');
-                connectionText.textContent = "Connected securely";
-
-                // Setup realtime listener
-                fetchAudits();
-
-            } catch (error) {
-                console.error("Authentication Error:", error);
-                showToast("Could not connect to database.", "error");
-                tableLoading.classList.add('hidden');
-                connectionStatus.classList.replace('bg-yellow-400', 'bg-red-500');
-                connectionText.textContent = "Connection failed";
-            }
+            // Load data from local storage
+            fetchAudits();
         }
 
         function fetchAudits() {
-            if (!currentUser) return;
-
-            // RULE 1: Strict paths for collaborative public data
-            const auditsRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'cdi_audits');
-            
-            // RULE 2: No complex queries. Just fetch all and sort in JS
-            unsubscribe = window.onSnapshot(auditsRef, (snapshot) => {
-                audits = [];
-                snapshot.forEach((doc) => {
-                    audits.push({ id: doc.id, ...doc.data() });
-                });
-
+            try {
+                const storedData = localStorage.getItem('tdmsh_audits');
+                if (storedData) {
+                    audits = JSON.parse(storedData);
+                } else {
+                    audits = [];
+                }
+                
                 // Sort in memory (newest first)
                 audits.sort((a, b) => {
-                    const timeA = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt).getTime()) : 0;
-                    const timeB = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt).getTime()) : 0;
+                    const timeA = new Date(a.createdAt).getTime();
+                    const timeB = new Date(b.createdAt).getTime();
                     return timeB - timeA;
                 });
 
                 renderTable();
                 updateDashboardSummary();
+            } catch (error) {
+                console.error("Local Storage Error:", error);
+                showToast("Failed to load local records.", "error");
+            } finally {
                 tableLoading.classList.add('hidden');
-            }, (error) => {
-                console.error("Firestore Snapshot Error:", error);
-                showToast("Failed to sync records.", "error");
-                tableLoading.classList.add('hidden');
-            });
+            }
         }
 
         function renderTable() {
@@ -639,7 +570,6 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUser) return showToast("Cannot save: Not connected", "error");
 
             const generatedActions = window.calculateScore(); // Ensure fresh calc
 
@@ -684,8 +614,8 @@
                 socialHistory: document.getElementById('socialHistory').value.trim(),
                 summary: document.getElementById('summary').value.trim(),
                 
-                auditorId: currentUser ? currentUser.uid : 'anonymous',
-                createdAt: window.serverTimestamp ? window.serverTimestamp() : new Date().toISOString()
+                auditorId: 'local_user',
+                createdAt: new Date().toISOString()
             };
 
             // ==========================================
@@ -711,8 +641,10 @@
             }
 
             try {
-                const auditsRef = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'cdi_audits');
-                await window.addDoc(auditsRef, auditData);
+                // Save to LocalStorage
+                auditData.id = 'audit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                audits.push(auditData);
+                localStorage.setItem('tdmsh_audits', JSON.stringify(audits));
                 
                 showToast("Comprehensive audit saved successfully!");
                 form.reset();
@@ -726,8 +658,10 @@
                 window.calculateScore();
                 document.getElementById('dateAdmission').valueAsDate = new Date();
                 
+                fetchAudits(); // Refresh table
+                
             } catch (error) {
-                console.error("Error adding document: ", error);
+                console.error("Error saving document: ", error);
                 showToast("Error saving record.", "error");
             } finally {
                 submitBtn.innerHTML = originalBtnHtml;
@@ -736,12 +670,11 @@
         });
 
         window.deleteRecord = async (id) => {
-            // Replaces confirm() with a custom check (for simplicity in iframe, direct delete with toast)
-            // In a production app, a custom modal is better, but this works within rules.
             try {
-                const docRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'cdi_audits', id);
-                await window.deleteDoc(docRef);
+                audits = audits.filter(a => a.id !== id);
+                localStorage.setItem('tdmsh_audits', JSON.stringify(audits));
                 showToast("Record deleted.");
+                fetchAudits(); // Refresh table
             } catch (error) {
                 console.error("Error deleting document:", error);
                 showToast("Error deleting record.", "error");
