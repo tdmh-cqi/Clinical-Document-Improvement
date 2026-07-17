@@ -10,34 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-        }
-        .table-container::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 4px;
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         .toast-enter { animation: slideInRight 0.3s ease-out forwards; }
         .toast-exit { animation: fadeOut 0.3s ease-out forwards; }
         
@@ -50,55 +30,58 @@
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
     <!-- Login Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-[100] transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 flex flex-col items-center">
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-[100] transition-opacity duration-300 px-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full flex flex-col items-center">
             <div class="bg-blue-100 p-4 rounded-full text-blue-800 mb-4">
-                <i class="fa-solid fa-lock text-3xl"></i>
+                <i class="fa-solid fa-user-shield text-3xl"></i>
             </div>
             <h2 class="text-xl font-bold text-slate-800 mb-2">CDI Audit App 2026</h2>
-            <p class="text-sm text-slate-500 mb-6 text-center">Please enter the access password to continue.</p>
+            <p class="text-sm text-slate-500 mb-6 text-center">Login with your Google Sheet credentials.</p>
             <form id="loginForm" class="w-full flex flex-col gap-4">
                 <div>
-                    <input type="password" id="appPassword" placeholder="Enter password" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3 text-center text-lg tracking-widest">
-                    <p id="loginError" class="text-red-500 text-xs font-semibold mt-2 text-center hidden">Incorrect password. Please try again.</p>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Username</label>
+                    <input type="text" id="appUsername" placeholder="Enter username" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3">
                 </div>
-                <button type="submit" class="w-full bg-blue-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-900 transition-colors">
-                    Unlock App
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="appPassword" placeholder="Enter password" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3">
+                    <p id="loginError" class="text-red-500 text-xs font-semibold mt-2 text-center hidden">Incorrect credentials.</p>
+                </div>
+                <button type="submit" id="loginBtn" class="w-full bg-blue-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-900 transition-colors mt-2 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Log In to System
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Main App Wrapper (Hidden until unlocked) -->
+    <!-- Main App Wrapper -->
     <div id="mainAppWrapper" class="hidden flex-col min-h-screen w-full">
+        <!-- Header -->
         <header class="bg-blue-800 text-white shadow-md relative z-10">
-            <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
                 <div class="flex items-center gap-3">
-                    <div class="bg-white p-2 rounded-lg shadow-sm">
-                        <i class="fa-solid fa-hospital-user text-blue-800 text-xl"></i>
-                    </div>
+                    <div class="bg-white p-2 rounded-lg shadow-sm hidden sm:block"><i class="fa-solid fa-hospital-user text-blue-800 text-xl"></i></div>
                     <div>
                         <h1 class="text-xl font-bold leading-tight">Taytay Doctors Multispecialty Hospital</h1>
                         <p class="text-blue-200 text-xs font-medium uppercase tracking-wider">Clinical Documents Improvement (CDI)</p>
                     </div>
                 </div>
+                <div class="text-sm font-medium text-blue-200 bg-blue-900 px-3 py-1.5 rounded-full">
+                    <i class="fa-solid fa-user text-xs mr-1"></i> <span id="displayUsername" class="text-white font-bold tracking-wider"></span>
+                </div>
             </div>
-            
-            <!-- Subheader -->
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+            <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                 <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
-                <div id="liveScoreBadge" class="hidden px-3 py-1 rounded-full text-sm font-bold border"></div>
+                <div id="liveScoreBadge" class="hidden px-3 py-1 rounded-full text-xs sm:text-sm font-bold border"></div>
             </div>
         </header>
 
-        <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex flex-col gap-8">
+        <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6 sm:gap-8 overflow-x-hidden">
             <form id="auditForm" class="flex flex-col gap-6">
                 <!-- Patient Demographics & Info -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">
-                        Patient Details
-                    </div>
-                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">Patient Details</div>
+                    <div class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="col-span-1 md:col-span-2 lg:col-span-2">
                             <label class="block text-sm font-medium text-slate-700 mb-1">Patient Name</label>
                             <input type="text" id="patientName" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
@@ -131,21 +114,19 @@
                 </div>
 
                 <!-- Checklist Table -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full max-w-full">
                     <div class="table-container overflow-x-auto w-full">
-                        <table class="w-full text-sm text-left">
+                        <table class="w-full text-sm text-left whitespace-nowrap sm:whitespace-normal">
                             <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
                                 <tr>
                                     <th class="px-3 py-3 w-12 text-center">#</th>
-                                    <th class="px-4 py-3 min-w-[300px]">AUDIT ITEM</th>
+                                    <th class="px-4 py-3 min-w-[250px]">AUDIT ITEM</th>
                                     <th class="px-4 py-3 w-32 text-center">ANSWER</th>
                                     <th class="px-4 py-3 w-20 text-center">SCORE</th>
-                                    <th class="px-4 py-3 min-w-[200px]">AUTO ACTION</th>
+                                    <th class="px-4 py-3 min-w-[180px]">AUTO ACTION</th>
                                 </tr>
                             </thead>
-                            <tbody id="checklistBody" class="divide-y divide-slate-200">
-                                <!-- Populated by JS -->
-                            </tbody>
+                            <tbody id="checklistBody" class="divide-y divide-slate-200"></tbody>
                             <tfoot class="bg-slate-50 border-t-2 border-slate-300">
                                 <tr>
                                     <td colspan="3" class="px-4 py-3 text-right font-bold text-slate-700">TOTAL SCORE</td>
@@ -155,9 +136,7 @@
                                 <tr>
                                     <td colspan="3" class="px-4 py-3 text-right font-bold text-slate-700">RESULT</td>
                                     <td colspan="2" class="p-0">
-                                        <div id="resultDisplay" class="px-4 py-3 font-bold text-lg w-full h-full text-slate-400">
-                                            -
-                                        </div>
+                                        <div id="resultDisplay" class="px-4 py-3 font-bold text-lg w-full h-full text-slate-400">-</div>
                                     </td>
                                 </tr>
                             </tfoot>
@@ -165,98 +144,77 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Review of Systems (ROS) -->
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
-                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 font-semibold text-slate-700 flex justify-between items-center">
-                            <span>E. Review of Systems</span>
-                            <span class="text-xs font-normal text-slate-500">Check to add notes</span>
+                <!-- ROS and Summaries -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-full">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full w-full">
+                        <div class="bg-slate-50 px-4 sm:px-5 py-3 border-b border-slate-200 font-semibold text-slate-700 flex justify-between items-center">
+                            <span>E. Review of Systems</span><span class="text-xs font-normal text-slate-500">Check to add notes</span>
                         </div>
-                        <div class="p-5 flex-grow">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3" id="rosContainer">
-                                <!-- Populated by JS -->
-                            </div>
-                        </div>
+                        <div class="p-4 sm:p-5 flex-grow"><div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3" id="rosContainer"></div></div>
                     </div>
 
-                    <!-- Past, Family, Social History & Summary -->
-                    <div class="flex flex-col gap-6 h-full">
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                            <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">
-                                F. Past, Family, and Social History
-                            </div>
-                            <div class="p-5 flex flex-col gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Past History</label>
-                                    <textarea id="pastHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2" placeholder="Major illnesses, surgeries, meds, allergies..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Family History</label>
-                                    <textarea id="familyHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2" placeholder="Hereditary diseases, health status of family..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-1">Social History</label>
-                                    <textarea id="socialHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2" placeholder="Occupation, alcohol, tobacco, drugs..."></textarea>
-                                </div>
+                    <div class="flex flex-col gap-6 h-full w-full">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
+                            <div class="bg-slate-50 px-4 sm:px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">F. Past, Family, and Social History</div>
+                            <div class="p-4 sm:p-5 flex flex-col gap-4">
+                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Past History</label><textarea id="pastHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2"></textarea></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Family History</label><textarea id="familyHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2"></textarea></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Social History</label><textarea id="socialHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2"></textarea></div>
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-grow">
-                            <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">
-                                Auditor Summary / Overall Notes
-                            </div>
-                            <div class="p-5 flex-grow flex flex-col">
-                                <textarea id="summary" class="w-full h-full min-h-[100px] rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3 resize-y" placeholder="Enter final summary or additional auditor comments here..."></textarea>
-                            </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-grow w-full">
+                            <div class="bg-slate-50 px-4 sm:px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">Auditor Summary / Overall Notes</div>
+                            <div class="p-4 sm:p-5 flex-grow flex flex-col"><textarea id="summary" class="w-full h-full min-h-[100px] rounded-md border-slate-300 shadow-sm border p-3 resize-y" placeholder="Enter final summary here..."></textarea></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex justify-end pt-4 border-t border-slate-200">
-                    <button type="submit" id="submitBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center gap-2 text-lg">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Save Audit to Sheet
+                    <button type="submit" id="submitBtn" class="w-full sm:w-auto bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 text-lg">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save Audit to Live Database
                     </button>
                 </div>
             </form>
 
-            <!-- Dashboard / Audit Log -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-8">
-                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <!-- Dashboard / Audit Log (LIVE SYNCED) -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-2 sm:mt-8 w-full max-w-full">
+                <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-blue-600"></i> Audit Log
-                        <span id="recordCount" class="bg-blue-100 text-blue-800 text-xs py-1 px-2 rounded-full font-medium ml-2">0</span>
+                        <i class="fa-solid fa-database text-blue-600"></i> Live Database Audits
                     </h2>
                     
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button type="button" id="setupSheetBtn" onclick="setupGoogleSheet()" class="bg-blue-800 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-900 transition-colors flex items-center justify-center gap-2 shadow-sm flex-1 sm:flex-none">
-                            <i class="fa-solid fa-table-columns"></i> Setup Sheet
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <button type="button" onclick="fetchLiveAudits()" class="bg-blue-100 text-blue-800 text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
+                            <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i> Sync Sheet
                         </button>
-                        <button type="button" onclick="exportToCSV()" class="bg-emerald-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-sm flex-1 sm:flex-none">
+                        <button type="button" onclick="exportToCSV()" class="bg-emerald-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
                             <i class="fa-solid fa-file-excel"></i> Export (CSV)
                         </button>
                     </div>
                 </div>
-                
+
+                <!-- RESTORED: Dashboard Stats Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border-b border-slate-100 bg-slate-50">
-                    <div class="bg-white p-3 rounded border border-slate-200 text-center">
-                        <div class="text-xs text-slate-500 font-bold uppercase">Total Audits</div>
-                        <div class="text-xl font-black text-slate-800" id="dashTotal">0</div>
+                    <div class="bg-white p-3 rounded border border-slate-200 text-center shadow-sm">
+                        <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Audits</div>
+                        <div class="text-2xl font-black text-slate-800" id="statTotal">0</div>
                     </div>
                     <div class="bg-white p-3 rounded border border-green-200 text-center shadow-sm">
-                        <div class="text-xs text-green-600 font-bold uppercase">Passed</div>
-                        <div class="text-xl font-black text-green-700" id="dashPassed">0</div>
+                        <div class="text-xs text-green-600 font-bold uppercase tracking-wider">Passed</div>
+                        <div class="text-2xl font-black text-green-700" id="statPassed">0</div>
                     </div>
                     <div class="bg-white p-3 rounded border border-yellow-200 text-center shadow-sm">
-                        <div class="text-xs text-yellow-600 font-bold uppercase">Queries</div>
-                        <div class="text-xl font-black text-yellow-700" id="dashQuery">0</div>
+                        <div class="text-xs text-yellow-600 font-bold uppercase tracking-wider">Queries</div>
+                        <div class="text-2xl font-black text-yellow-700" id="statQuery">0</div>
                     </div>
                     <div class="bg-white p-3 rounded border border-red-200 text-center shadow-sm">
-                        <div class="text-xs text-red-600 font-bold uppercase">RTH Risk</div>
-                        <div class="text-xl font-black text-red-700" id="dashRTH">0</div>
+                        <div class="text-xs text-red-600 font-bold uppercase tracking-wider">RTH Risk</div>
+                        <div class="text-2xl font-black text-red-700" id="statRTH">0</div>
                     </div>
                 </div>
-
-                <div class="p-0 flex-grow overflow-x-auto relative">
+                
+                <div class="p-0 flex-grow overflow-x-auto relative w-full">
                     <table class="w-full text-sm text-left whitespace-nowrap">
                         <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
                             <tr>
@@ -264,58 +222,51 @@
                                 <th class="px-4 py-3">Admission</th>
                                 <th class="px-4 py-3 text-center">Score</th>
                                 <th class="px-4 py-3">Result</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
+                                <th class="px-4 py-3 text-right">Delete from Sheet</th>
                             </tr>
                         </thead>
-                        <tbody id="auditTableBody" class="divide-y divide-slate-100">
-                            <!-- Populated by JS -->
-                        </tbody>
+                        <tbody id="auditTableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                     
-                    <div id="tableLoading" class="p-8 text-center text-slate-400">
-                        <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
-                        <p>Loading records...</p>
+                    <div id="tableLoading" class="hidden p-8 text-center text-slate-400">
+                        <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-blue-500"></i>
+                        <p>Syncing securely with Google Sheets...</p>
                     </div>
                     
                     <div id="emptyState" class="hidden p-12 text-center flex flex-col items-center justify-center text-slate-500">
-                        <div class="bg-slate-100 p-4 rounded-full mb-3">
-                            <i class="fa-solid fa-folder-open text-3xl text-slate-400"></i>
-                        </div>
-                        <h3 class="text-lg font-medium text-slate-700">No Audits Found</h3>
-                        <p class="text-sm">Submit your first audit to see it here.</p>
+                        <div class="bg-slate-100 p-4 rounded-full mb-3"><i class="fa-solid fa-folder-open text-3xl text-slate-400"></i></div>
+                        <h3 class="text-lg font-medium text-slate-700">No Audits Found in Sheet</h3>
+                        <p class="text-sm">Submit your first audit or check Google Sheets.</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Toast Container -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3"></div>
 
     <script>
+        // ==========================================
+        // ⚠️ PASTE YOUR GOOGLE SCRIPT URL HERE:
+        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwU6lNIhmFQ2SAJDIz2fJ8h3Akbc4hhyhQoe5z19WABIsxfpZ7vBFo9ybrJqrAIeIi4pA/exec";
+        // ==========================================
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Global State
-            let audits = [];
+            let liveAudits = [];
             let currentScore = 0;
             let currentResult = "-";
 
-            // UI Elements mapping
             const loginOverlay = document.getElementById('loginOverlay');
             const mainAppWrapper = document.getElementById('mainAppWrapper');
             const loginForm = document.getElementById('loginForm');
             const loginError = document.getElementById('loginError');
-            
-            const form = document.getElementById('auditForm');
-            const submitBtn = document.getElementById('submitBtn');
+            const loginBtn = document.getElementById('loginBtn');
             const tableBody = document.getElementById('auditTableBody');
             const tableLoading = document.getElementById('tableLoading');
             const emptyState = document.getElementById('emptyState');
-            const recordCount = document.getElementById('recordCount');
-
-            // Set default date for UX
+            
             document.getElementById('dateAdmission').valueAsDate = new Date();
 
-            // Checklist Configuration
             const checklistData = [
                 { id: 'q1', group: 'A. CHIEF COMPLAINT', text: "CC documented in patient's own words", noAction: "SEND QUERY: Specify CC with duration" },
                 { id: 'q2', group: 'A. CHIEF COMPLAINT', text: "CC has duration", noAction: "SEND QUERY: Add x__ days" },
@@ -349,30 +300,28 @@
             function initChecklistUI() {
                 const tbody = document.getElementById('checklistBody');
                 let currentGroup = '';
-                
                 checklistData.forEach((item, index) => {
                     if (item.group !== currentGroup) {
                         currentGroup = item.group;
                         const groupRow = document.createElement('tr');
                         groupRow.className = 'checklist-group';
-                        groupRow.innerHTML = `<td colspan="5" class="px-4 py-1.5">${currentGroup}</td>`;
+                        groupRow.innerHTML = `<td colspan="5" class="px-4 py-1.5 whitespace-normal">${currentGroup}</td>`;
                         tbody.appendChild(groupRow);
                     }
-                    
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50 transition-colors";
                     tr.innerHTML = `
-                        <td class="px-3 py-1.5 text-center text-slate-500 font-medium">${index + 1}</td>
-                        <td class="px-4 py-1.5 text-slate-800">${item.text}</td>
-                        <td class="px-4 py-1.5 text-center">
+                        <td class="px-2 sm:px-3 py-1.5 text-center text-slate-500 font-medium">${index + 1}</td>
+                        <td class="px-2 sm:px-4 py-1.5 text-slate-800 whitespace-normal leading-snug">${item.text}</td>
+                        <td class="px-2 sm:px-4 py-1.5 text-center">
                             <select id="${item.id}" class="audit-select w-full rounded border-slate-300 text-sm p-1 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm" onchange="window.calculateScore()">
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                                 <option value="N/A" selected>N/A</option>
                             </select>
                         </td>
-                        <td class="px-4 py-1.5 text-center font-mono font-bold text-slate-700" id="score_${item.id}">0</td>
-                        <td class="px-4 py-1.5 text-xs text-red-600 font-medium" id="action_${item.id}"></td>
+                        <td class="px-2 sm:px-4 py-1.5 text-center font-mono font-bold text-slate-700" id="score_${item.id}">0</td>
+                        <td class="px-2 sm:px-4 py-1.5 text-xs text-red-600 font-medium whitespace-normal leading-tight" id="action_${item.id}"></td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -384,211 +333,203 @@
                     div.innerHTML = `
                         <div class="flex items-center gap-2">
                             <input type="checkbox" id="ros_${i}" value="${sys}" class="ros-checkbox rounded text-blue-600 focus:ring-blue-500 h-4 w-4" onchange="window.toggleRosNote(${i})">
-                            <label for="ros_${i}" class="font-semibold text-slate-700 select-none cursor-pointer leading-tight">${sys}</label>
+                            <label for="ros_${i}" class="font-semibold text-slate-700 select-none cursor-pointer leading-tight text-sm sm:text-base">${sys}</label>
                         </div>
                         <textarea id="ros_note_${i}" rows="1" class="hidden w-full mt-1 rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-1.5 text-xs text-slate-600" placeholder="Notes for ${sys}..."></textarea>
                     `;
                     rosContainer.appendChild(div);
                 });
-                
-                window.calculateScore(); // Initial calculation
+                window.calculateScore();
             }
 
             window.toggleRosNote = (index) => {
                 const checkbox = document.getElementById(`ros_${index}`);
                 const noteArea = document.getElementById(`ros_note_${index}`);
-                if (checkbox.checked) {
-                    noteArea.classList.remove('hidden');
-                } else {
-                    noteArea.classList.add('hidden');
-                    noteArea.value = ''; // Clear note if unchecked
-                }
+                if (checkbox.checked) noteArea.classList.remove('hidden');
+                else { noteArea.classList.add('hidden'); noteArea.value = ''; }
             };
 
             window.calculateScore = () => {
                 currentScore = 0;
                 let actionItems = [];
-
                 checklistData.forEach(item => {
                     const select = document.getElementById(item.id);
                     const scoreCell = document.getElementById(`score_${item.id}`);
                     const actionCell = document.getElementById(`action_${item.id}`);
                     
-                    let val = select.value;
-                    let score = 0;
-                    
-                    if (val === 'Yes') {
-                        score = 1;
-                        actionCell.textContent = '';
-                    } else if (val === 'No') {
-                        score = 0;
-                        actionCell.textContent = item.noAction;
-                        actionItems.push(item.noAction);
-                    } else {
-                        score = 0;
-                        actionCell.textContent = '';
-                    }
-                    
-                    scoreCell.textContent = score;
-                    currentScore += score;
+                    if (select.value === 'Yes') { scoreCell.textContent = 1; currentScore += 1; actionCell.textContent = ''; } 
+                    else if (select.value === 'No') { scoreCell.textContent = 0; actionCell.textContent = item.noAction; actionItems.push(item.noAction); } 
+                    else { scoreCell.textContent = 0; actionCell.textContent = ''; }
                 });
 
                 document.getElementById('totalScoreDisplay').textContent = currentScore;
-                
                 const resultDisplay = document.getElementById('resultDisplay');
                 const liveBadge = document.getElementById('liveScoreBadge');
-                
                 liveBadge.classList.remove('hidden', 'score-pass', 'score-query', 'score-rth');
-                resultDisplay.className = 'px-4 py-3 text-left font-bold text-lg';
+                resultDisplay.className = 'px-4 py-3 text-left font-bold text-base sm:text-lg whitespace-normal';
 
                 if (currentScore >= 18) {
-                    currentResult = "PASS";
-                    resultDisplay.textContent = "PASS (Complete Documentation)";
-                    resultDisplay.classList.add('text-green-700');
-                    liveBadge.textContent = "PASS";
-                    liveBadge.classList.add('score-pass', 'bg-green-100', 'text-green-800');
+                    currentResult = "PASS"; resultDisplay.textContent = "PASS (Complete Documentation)"; resultDisplay.classList.add('text-green-700');
+                    liveBadge.textContent = "PASS"; liveBadge.classList.add('score-pass', 'bg-green-100', 'text-green-800');
                 } else if (currentScore >= 14) {
-                    currentResult = "QUERY NEEDED";
-                    resultDisplay.textContent = "QUERY NEEDED (Send Query to Doctor)";
-                    resultDisplay.classList.add('text-yellow-700');
-                    liveBadge.textContent = "QUERY NEEDED";
-                    liveBadge.classList.add('score-query', 'bg-yellow-100', 'text-yellow-800');
+                    currentResult = "QUERY NEEDED"; resultDisplay.textContent = "QUERY NEEDED (Send Query to Doctor)"; resultDisplay.classList.add('text-yellow-700');
+                    liveBadge.textContent = "QUERY NEEDED"; liveBadge.classList.add('score-query', 'bg-yellow-100', 'text-yellow-800');
                 } else {
-                    currentResult = "RTH RISK";
-                    resultDisplay.textContent = "RTH RISK (Weak Justification, Risk of Denial)";
-                    resultDisplay.classList.add('text-red-700');
-                    liveBadge.textContent = "RTH RISK";
-                    liveBadge.classList.add('score-rth', 'bg-red-100', 'text-red-800');
+                    currentResult = "RTH RISK"; resultDisplay.textContent = "RTH RISK (Weak Justification, Risk of Denial)"; resultDisplay.classList.add('text-red-700');
+                    liveBadge.textContent = "RTH RISK"; liveBadge.classList.add('score-rth', 'bg-red-100', 'text-red-800');
                 }
-                
                 return actionItems;
             };
 
-            // Toast Notification System
             window.showToast = function(message, type = 'success') {
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-500' : 'fa-circle-exclamation text-red-500';
-                
-                toast.className = `toast-enter bg-white border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'} shadow-lg rounded p-4 flex items-center gap-3 min-w-[300px] text-slate-800`;
-                toast.innerHTML = `
-                    <i class="fa-solid ${icon} text-xl"></i>
-                    <div class="flex-grow font-medium text-sm">${message}</div>
-                    <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-                `;
-                
+                toast.className = `toast-enter bg-white border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'} shadow-lg rounded p-4 flex items-center gap-3 min-w-[280px] sm:min-w-[300px] text-slate-800`;
+                toast.innerHTML = `<i class="fa-solid ${icon} text-xl"></i><div class="flex-grow font-medium text-sm">${message}</div><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>`;
                 document.getElementById('toastContainer').appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.classList.replace('toast-enter', 'toast-exit');
-                    setTimeout(() => toast.remove(), 300);
-                }, 4000);
+                setTimeout(() => { toast.classList.replace('toast-enter', 'toast-exit'); setTimeout(() => toast.remove(), 300); }, 4000);
             };
 
-            function checkAuth() {
-                if (sessionStorage.getItem('tdmsh_cdi_auth_2026') === 'true') {
-                    loginOverlay.classList.add('hidden');
-                    mainAppWrapper.classList.remove('hidden');
-                    mainAppWrapper.classList.add('flex');
-                }
-            }
-
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const pw = document.getElementById('appPassword').value;
-                if (pw === 'tdmhcqi2026') {
-                    sessionStorage.setItem('tdmsh_cdi_auth_2026', 'true');
-                    loginError.classList.add('hidden');
-                    loginOverlay.classList.add('opacity-0'); 
-                    setTimeout(() => {
-                        loginOverlay.classList.add('hidden');
-                        mainAppWrapper.classList.remove('hidden');
-                        mainAppWrapper.classList.add('flex');
-                    }, 300);
-                } else {
-                    loginError.classList.remove('hidden');
-                    document.getElementById('appPassword').value = '';
-                }
-            });
-
-            function fetchAudits() {
-                try {
-                    const storedData = localStorage.getItem('tdmsh_audits');
-                    if (storedData) audits = JSON.parse(storedData);
-                    else audits = [];
-                    
-                    audits.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-                    renderTable();
-                    updateDashboardSummary();
-                } catch (error) {
-                    console.error("Local Storage Error:", error);
-                    window.showToast("Failed to load local records.", "error");
-                } finally {
-                    tableLoading.classList.add('hidden');
-                }
-            }
-
-            function renderTable() {
-                tableBody.innerHTML = '';
-                recordCount.textContent = audits.length;
-
-                if (audits.length === 0) {
-                    emptyState.classList.remove('hidden');
-                    return;
-                } else {
-                    emptyState.classList.add('hidden');
-                }
-
-                audits.forEach(audit => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors group";
-                    const admDate = new Date(audit.dateAdmission).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'});
-                    
-                    let badgeClass = 'bg-slate-100 text-slate-800 border-slate-300';
-                    if (audit.result === 'PASS') badgeClass = 'bg-green-100 text-green-800 border-green-300';
-                    if (audit.result === 'QUERY NEEDED') badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                    if (audit.result === 'RTH RISK') badgeClass = 'bg-red-100 text-red-800 border-red-300';
-
-                    tr.innerHTML = `
-                        <td class="px-4 py-3 align-middle">
-                            <div class="font-bold text-slate-800">${escapeHtml(audit.patientName)}</div>
-                            <div class="text-xs text-slate-500">Age: ${audit.age}</div>
-                        </td>
-                        <td class="px-4 py-3 align-middle whitespace-nowrap text-sm text-slate-700">${admDate}</td>
-                        <td class="px-4 py-3 align-middle text-center"><span class="font-bold text-lg">${audit.score !== undefined ? audit.score : '-'}</span><span class="text-xs text-slate-500">/20</span></td>
-                        <td class="px-4 py-3 align-middle"><span class="px-2 py-1 rounded border text-xs font-bold ${badgeClass}">${audit.result || 'N/A'}</span></td>
-                        <td class="px-4 py-3 align-middle text-right">
-                            <button onclick="window.deleteRecord('${audit.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Delete Record">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(tr);
-                });
-            }
-
-            function updateDashboardSummary() {
-                const total = audits.length;
+            function updateDashboardStats(dataArray) {
+                const total = dataArray.length;
                 let passed = 0, query = 0, rth = 0;
-
-                audits.forEach(a => {
+                
+                dataArray.forEach(a => {
                     if (a.result === 'PASS') passed++;
                     else if (a.result === 'QUERY NEEDED') query++;
                     else if (a.result === 'RTH RISK') rth++;
                 });
 
-                document.getElementById('dashTotal').textContent = total;
-                document.getElementById('dashPassed').textContent = passed;
-                document.getElementById('dashQuery').textContent = query;
-                document.getElementById('dashRTH').textContent = rth;
+                document.getElementById('statTotal').textContent = total;
+                document.getElementById('statPassed').textContent = passed;
+                document.getElementById('statQuery').textContent = query;
+                document.getElementById('statRTH').textContent = rth;
             }
 
-            form.addEventListener('submit', async (e) => {
+            // DYNAMIC LOGIN TO GOOGLE SHEETS
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const username = document.getElementById('appUsername').value;
+                const password = document.getElementById('appPassword').value;
+                const originalHtml = loginBtn.innerHTML;
+                
+                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying with Database...';
+                loginBtn.disabled = true;
+                loginError.classList.add('hidden');
 
+                try {
+                    const res = await fetch(GOOGLE_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "login", username: username, password: password })
+                    });
+                    const result = await res.json();
+                    
+                    if (result.status === 'success') {
+                        sessionStorage.setItem('tdmsh_logged_in', 'true');
+                        sessionStorage.setItem('tdmsh_user', username.toUpperCase());
+                        
+                        document.getElementById('displayUsername').textContent = username.toUpperCase();
+                        loginOverlay.classList.add('opacity-0'); 
+                        setTimeout(() => {
+                            loginOverlay.classList.add('hidden');
+                            mainAppWrapper.classList.remove('hidden');
+                            mainAppWrapper.classList.add('flex');
+                            window.fetchLiveAudits();
+                        }, 300);
+                    } else {
+                        loginError.textContent = result.message || "Incorrect credentials.";
+                        loginError.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    loginError.textContent = "Connection error. Ensure Google Script URL is correct and deployed.";
+                    loginError.classList.remove('hidden');
+                } finally {
+                    loginBtn.innerHTML = originalHtml;
+                    loginBtn.disabled = false;
+                }
+            });
+
+            // FETCH LIVE DATA FROM SHEETS
+            window.fetchLiveAudits = async () => {
+                tableBody.innerHTML = '';
+                emptyState.classList.add('hidden');
+                tableLoading.classList.remove('hidden');
+                document.getElementById('refreshIcon').classList.add('fa-spin');
+
+                try {
+                    const res = await fetch(GOOGLE_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "fetch" })
+                    });
+                    const json = await res.json();
+                    
+                    liveAudits = json.data || [];
+                    
+                    updateDashboardStats(liveAudits);
+
+                    if (liveAudits.length === 0) {
+                        emptyState.classList.remove('hidden');
+                    } else {
+                        liveAudits.forEach(audit => {
+                            const tr = document.createElement('tr');
+                            tr.className = "hover:bg-slate-50 transition-colors group border-b";
+                            const admDate = audit.dateAdmission ? new Date(audit.dateAdmission).toLocaleDateString() : 'N/A';
+                            
+                            let badgeClass = 'bg-slate-100 text-slate-800 border-slate-300';
+                            if (audit.result === 'PASS') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                            if (audit.result === 'QUERY NEEDED') badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                            if (audit.result === 'RTH RISK') badgeClass = 'bg-red-100 text-red-800 border-red-300';
+
+                            tr.innerHTML = `
+                                <td class="px-4 py-3 align-middle whitespace-normal min-w-[150px]"><div class="font-bold text-slate-800">${escapeHtml(audit.patientName)}</div><div class="text-xs text-slate-500">Age: ${audit.age}</div></td>
+                                <td class="px-4 py-3 align-middle text-sm text-slate-700">${admDate}</td>
+                                <td class="px-4 py-3 align-middle text-center"><span class="font-bold text-lg">${audit.score}</span><span class="text-xs text-slate-500">/20</span></td>
+                                <td class="px-4 py-3 align-middle whitespace-normal"><span class="px-2 py-1 rounded border text-xs font-bold ${badgeClass}">${audit.result}</span></td>
+                                <td class="px-4 py-3 align-middle text-right">
+                                    <button onclick="window.deleteLiveRecord('${audit.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50" title="Delete from live sheet">
+                                        <i class="fa-solid fa-trash-can text-lg"></i>
+                                    </button>
+                                </td>
+                            `;
+                            tableBody.appendChild(tr);
+                        });
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    window.showToast("Could not sync with Google Sheets.", "error");
+                } finally {
+                    tableLoading.classList.add('hidden');
+                    document.getElementById('refreshIcon').classList.remove('fa-spin');
+                }
+            };
+
+            window.deleteLiveRecord = async (id) => {
+                if(!confirm("Are you sure you want to permanently delete this record from the Google Sheet?")) return;
+                
+                try {
+                    const res = await fetch(GOOGLE_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "delete", id: id })
+                    });
+                    const json = await res.json();
+                    
+                    if (json.status === 'success') {
+                        window.showToast("Record permanently deleted.");
+                        window.fetchLiveAudits();
+                    } else {
+                        window.showToast("Failed to delete from sheet.", "error");
+                    }
+                } catch(e) {
+                    window.showToast("Connection error while deleting.", "error");
+                }
+            };
+
+            document.getElementById('auditForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
                 const generatedActions = window.calculateScore(); 
+                const submitBtn = document.getElementById('submitBtn');
                 const originalBtnHtml = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Syncing to Database...';
                 submitBtn.disabled = true;
                 
                 const rosData = [];
@@ -599,11 +540,10 @@
                 });
                 
                 const checklistAnswers = {};
-                checklistData.forEach(item => {
-                    checklistAnswers[item.id] = document.getElementById(item.id).value;
-                });
+                checklistData.forEach(item => { checklistAnswers[item.id] = document.getElementById(item.id).value; });
 
                 const auditData = {
+                    id: 'ID_' + Math.random().toString(36).substr(2, 9).toUpperCase(),
                     patientName: document.getElementById('patientName').value.trim(),
                     age: parseInt(document.getElementById('age').value),
                     dateAdmission: document.getElementById('dateAdmission').value,
@@ -623,143 +563,56 @@
                     createdAt: new Date().toISOString()
                 };
 
-                const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwU6lNIhmFQ2SAJDIz2fJ8h3Akbc4hhyhQoe5z19WABIsxfpZ7vBFo9ybrJqrAIeIi4pA/exec"; 
-                
-                if (GOOGLE_WEB_APP_URL !== "") {
-                    try {
-                        fetch(GOOGLE_WEB_APP_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify(auditData)
-                        });
-                    } catch (sheetError) {
-                        console.error("Google Sheets Sync Error:", sheetError);
-                    }
-                }
-
                 try {
-                    auditData.id = 'audit_' + Date.now();
-                    audits.push(auditData);
-                    localStorage.setItem('tdmsh_audits', JSON.stringify(audits));
-                    
-                    window.showToast("Comprehensive audit saved successfully!");
-                    form.reset();
-                    document.querySelectorAll('.audit-select').forEach(sel => sel.value = 'N/A');
-                    document.querySelectorAll('textarea[id^="ros_note_"]').forEach(ta => {
-                        ta.classList.add('hidden');
-                        ta.value = '';
+                    const res = await fetch(GOOGLE_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(auditData)
                     });
-                    window.calculateScore();
-                    document.getElementById('dateAdmission').valueAsDate = new Date();
-                    fetchAudits(); 
                     
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        window.showToast("Audit securely saved to Google Sheets!");
+                        e.target.reset();
+                        document.querySelectorAll('.audit-select').forEach(sel => sel.value = 'N/A');
+                        document.querySelectorAll('textarea[id^="ros_note_"]').forEach(ta => { ta.classList.add('hidden'); ta.value = ''; });
+                        window.calculateScore();
+                        document.getElementById('dateAdmission').valueAsDate = new Date();
+                        
+                        window.fetchLiveAudits(); 
+                    } else {
+                        throw new Error(result.message);
+                    }
                 } catch (error) {
-                    console.error("Error saving document: ", error);
-                    window.showToast("Error saving record.", "error");
+                    console.error("Save error:", error);
+                    window.showToast("Failed to save to Google Sheets.", "error");
                 } finally {
                     submitBtn.innerHTML = originalBtnHtml;
                     submitBtn.disabled = false;
                 }
             });
 
-            // Utilities & Exports attached to window object so inline HTML onclicks can find them
-            window.deleteRecord = (id) => {
-                audits = audits.filter(a => a.id !== id);
-                localStorage.setItem('tdmsh_audits', JSON.stringify(audits));
-                window.showToast("Record deleted.");
-                fetchAudits(); 
-            };
-
-            window.setupGoogleSheet = async () => {
-                const btn = document.getElementById('setupSheetBtn');
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Setting up...';
-                btn.disabled = true;
-
-                const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwU6lNIhmFQ2SAJDIz2fJ8h3Akbc4hhyhQoe5z19WABIsxfpZ7vBFo9ybrJqrAIeIi4pA/exec";
-                
-                try {
-                    fetch(GOOGLE_WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({ action: "setup" })
-                    });
-                    
-                    setTimeout(() => {
-                        window.showToast("Setup command sent! Check Row 1 of your Google Sheet.", "success");
-                        btn.innerHTML = originalHtml;
-                        btn.disabled = false;
-                    }, 1500);
-                } catch (error) {
-                    window.showToast("Failed to send setup command.", "error");
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
-                }
-            };
-
             window.exportToCSV = () => {
-                if (audits.length === 0) {
-                    window.showToast("No data available to export.", "error");
-                    return;
-                }
-                const headers = [
-                    "System ID", "Date Created", "Patient Name", "Age", 
-                    "Admission Date", "Discharge Date", "Chief Complaint", 
-                    "Admitting Diagnosis", "Final Diagnosis",
-                    "Total Score", "Result Category", "Auto Actions Triggered",
-                    "Review of Systems", "Past History", "Family History", "Social History", "Auditor Summary"
-                ];
-                checklistData.forEach((item, i) => headers.push(`Q${i+1}: ${item.text.replace(/,/g, '')}`));
-
-                const rows = audits.map(a => {
-                    const timeStr = new Date(a.createdAt).toISOString();
-                    const actionsStr = (a.autoActions || []).join(" | ");
-                    
-                    let rosStr = "";
-                    if (a.ros && Array.isArray(a.ros)) {
-                        rosStr = a.ros.map(r => `${r.system}${r.note ? ': ' + r.note : ''}`).join(" | ");
-                    }
-                    
-                    let row = [
-                        `"${a.id}"`, `"${timeStr}"`, `"${a.patientName.replace(/"/g, '""')}"`, a.age,
-                        `"${a.dateAdmission}"`, `"${a.dateDischarge}"`, `"${a.chiefComplaint.replace(/"/g, '""')}"`,
-                        `"${a.admittingDiagnosis.replace(/"/g, '""')}"`, `"${a.finalDiagnosis.replace(/"/g, '""')}"`,
-                        a.score || 0, `"${a.result || ''}"`, `"${actionsStr.replace(/"/g, '""')}"`,
-                        `"${rosStr.replace(/"/g, '""')}"`, `"${(a.pastHistory||'').replace(/"/g, '""')}"`,
-                        `"${(a.familyHistory||'').replace(/"/g, '""')}"`, `"${(a.socialHistory||'').replace(/"/g, '""')}"`,
-                        `"${a.summary.replace(/"/g, '""')}"`
-                    ];
-                    
-                    checklistData.forEach(item => {
-                        const ans = a.checklist ? a.checklist[item.id] : 'N/A';
-                        row.push(`"${ans}"`);
-                    });
-                    return row;
-                });
-
+                if (liveAudits.length === 0) { window.showToast("No data to export.", "error"); return; }
+                const headers = ["System ID", "Date Created", "Patient Name", "Age", "Admission Date", "Score", "Result"];
+                const rows = liveAudits.map(a => [`"${a.id}"`, `"${a.createdAt}"`, `"${a.patientName}"`, a.age, `"${a.dateAdmission}"`, a.score, `"${a.result}"`]);
                 const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-                const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `TDMSH_Comprehensive_CDI_Audit_${new Date().toISOString().split('T')[0]}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.showToast("Detailed CSV exported for Excel/Sheets!");
+                link.setAttribute("href", encodeURI(csvContent));
+                link.setAttribute("download", `TDMSH_Audits_Export.csv`);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
             };
 
-            function escapeHtml(unsafe) {
-                return (unsafe || "").toString()
-                     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                     .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-            }
+            function escapeHtml(unsafe) { return (unsafe || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-            // Boot initialization
-            checkAuth();
+            // Boot System
+            if (sessionStorage.getItem('tdmsh_logged_in') === 'true') {
+                document.getElementById('displayUsername').textContent = sessionStorage.getItem('tdmsh_user') || 'USER';
+                loginOverlay.classList.add('hidden');
+                mainAppWrapper.classList.remove('hidden');
+                mainAppWrapper.classList.add('flex');
+                window.fetchLiveAudits();
+            }
             initChecklistUI();
-            fetchAudits();
         });
     </script>
 </body>
