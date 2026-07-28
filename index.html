@@ -39,11 +39,11 @@
             <form id="loginForm" class="w-full flex flex-col gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Username</label>
-                    <input type="text" id="appUsername" placeholder="Enter username" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3">
+                    <input type="text" id="appUsername" autocomplete="off" placeholder="Enter username" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-                    <input type="password" id="appPassword" placeholder="Enter password" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3">
+                    <input type="password" id="appPassword" autocomplete="new-password" placeholder="Enter password" required class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3">
                     <p id="loginError" class="text-red-500 text-xs font-semibold mt-2 text-center hidden">Incorrect credentials.</p>
                 </div>
                 <button type="submit" id="loginBtn" class="w-full bg-blue-800 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-900 transition-colors mt-2 flex items-center justify-center gap-2">
@@ -64,12 +64,15 @@
                         <p class="text-blue-200 text-xs font-medium uppercase tracking-wider">Clinical Documents Improvement (CDI)</p>
                     </div>
                 </div>
-                <div class="text-sm font-medium text-blue-200 bg-blue-900 px-3 py-1.5 rounded-full flex items-center gap-2">
-                    <i class="fa-solid fa-user text-xs"></i> <span id="displayUsername" class="text-white font-bold tracking-wider"></span>
+                <!-- GROUPED USERNAME AND LOGOUT BUTTON HERE -->
+                <div class="flex items-center gap-3">
+                    <div class="text-sm font-medium text-blue-200 bg-blue-900 px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <i class="fa-solid fa-user text-xs"></i> <span id="displayUsername" class="text-white font-bold tracking-wider"></span>
+                    </div>
+                    <button type="button" onclick="window.logout()" class="bg-blue-900 hover:bg-red-600 text-blue-200 hover:text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Sign Out</span>
+                    </button>
                 </div>
-                <button type="button" onclick="window.logout()" class="bg-blue-900 hover:bg-red-600 text-blue-200 hover:text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
-                    <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Sign Out</span>
-                </button>
             </div>
             <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex justify-between items-center transition-all duration-300" id="formHeaderContainer">
                 <h2 id="formHeaderTitle" class="text-lg font-semibold text-slate-800 flex items-center"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
@@ -178,6 +181,9 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row justify-end pt-4 border-t border-slate-200 gap-4">
+                    <button type="button" id="clearFormBtn" onclick="window.clearForm()" class="w-full sm:w-auto bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-8 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2 text-lg">
+                        <i class="fa-solid fa-eraser"></i> Clear Form
+                    </button>
                     <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden w-full sm:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors items-center justify-center gap-2 text-lg">
                         <i class="fa-solid fa-xmark"></i> Cancel Edit
                     </button>
@@ -375,7 +381,37 @@
         </div>
     </div>
 
-    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3"></div>
+    <!-- CUSTOM LOGOUT CONFIRMATION MODAL -->
+    <div id="logoutModal" class="fixed inset-0 bg-slate-900/80 hidden flex-col items-center justify-center z-[110] transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <i class="fa-solid fa-arrow-right-from-bracket text-red-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Sign Out</h3>
+            <p class="text-sm text-slate-500 mb-6">Are you sure you want to sign out of the CDI System? Any unsaved changes will be lost.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="document.getElementById('logoutModal').classList.add('hidden')" class="bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold py-2.5 px-4 rounded-lg transition-colors w-full">Cancel</button>
+                <button id="confirmLogoutBtn" onclick="window.confirmLogout()" class="bg-red-600 text-white hover:bg-red-700 font-bold py-2.5 px-4 rounded-lg transition-colors w-full shadow-sm">Yes, Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM DELETE CONFIRMATION MODAL -->
+    <div id="deleteModal" class="fixed inset-0 bg-slate-900/80 hidden flex-col items-center justify-center z-[110] transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <i class="fa-solid fa-trash-can text-red-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Delete Record</h3>
+            <p class="text-sm text-slate-500 mb-6">Are you sure you want to permanently delete this audit record? This action cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="document.getElementById('deleteModal').classList.add('hidden')" class="bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold py-2.5 px-4 rounded-lg transition-colors w-full">Cancel</button>
+                <button id="confirmDeleteBtn" onclick="window.confirmDelete()" class="bg-red-600 text-white hover:bg-red-700 font-bold py-2.5 px-4 rounded-lg transition-colors w-full shadow-sm">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[120] flex flex-col gap-3"></div>
 
     <script>
         // ==========================================
@@ -388,6 +424,7 @@
             let currentScore = 0;
             let currentResult = "-";
             let editingId = null; 
+            let recordToDelete = null;
 
             const loginOverlay = document.getElementById('loginOverlay');
             const mainAppWrapper = document.getElementById('mainAppWrapper');
@@ -401,6 +438,7 @@
             const formHeaderContainer = document.getElementById('formHeaderContainer');
             const submitBtn = document.getElementById('submitBtn');
             const cancelEditBtn = document.getElementById('cancelEditBtn');
+            const clearFormBtn = document.getElementById('clearFormBtn');
             
             document.getElementById('dateAdmission').valueAsDate = new Date();
 
@@ -735,26 +773,45 @@
                     const result = await res.json();
                     
                     if (result.status === 'success') {
+                        // Success Animation
+                        loginBtn.innerHTML = '<i class="fa-solid fa-check-circle text-xl"></i> Logged In!';
+                        loginBtn.classList.replace('bg-blue-800', 'bg-emerald-600');
+                        loginBtn.classList.replace('hover:bg-blue-900', 'hover:bg-emerald-700');
+
                         sessionStorage.setItem('tdmsh_logged_in', 'true');
                         sessionStorage.setItem('tdmsh_user', username.toUpperCase());
                         
                         document.getElementById('displayUsername').textContent = username.toUpperCase();
-                        loginOverlay.classList.add('opacity-0'); 
+                        
+                        // Wait a brief moment for the animation to show
                         setTimeout(() => {
-                            loginOverlay.classList.add('hidden');
-                            mainAppWrapper.classList.remove('hidden');
-                            mainAppWrapper.classList.add('flex');
-                            window.fetchLiveAudits();
-                        }, 300);
+                            loginOverlay.classList.add('opacity-0'); 
+                            setTimeout(() => {
+                                loginOverlay.classList.add('hidden');
+                                mainAppWrapper.classList.remove('hidden');
+                                mainAppWrapper.classList.add('flex');
+                                window.fetchLiveAudits();
+                                
+                                // Welcome Toast
+                                window.showToast(`Welcome ${username.toUpperCase()} to CDI System!`, "success");
+                                
+                                // Reset button for future logouts
+                                loginBtn.innerHTML = originalHtml;
+                                loginBtn.classList.replace('bg-emerald-600', 'bg-blue-800');
+                                loginBtn.classList.replace('hover:bg-emerald-700', 'hover:bg-blue-900');
+                            }, 300);
+                        }, 800);
+                        
                     } else {
                         loginError.textContent = result.message || "Incorrect credentials.";
                         loginError.classList.remove('hidden');
+                        loginBtn.innerHTML = originalHtml;
                     }
                 } catch (error) {
                     loginError.textContent = "Connection error. Ensure Google Script URL is correct and deployed.";
                     loginError.classList.remove('hidden');
-                } finally {
                     loginBtn.innerHTML = originalHtml;
+                } finally {
                     loginBtn.disabled = false;
                 }
             });
@@ -845,12 +902,24 @@
                 }
             };
 
-            window.deleteLiveRecord = async (id) => {
-                if(!confirm("Are you sure you want to delete this record permanently?")) return;
+            window.deleteLiveRecord = (id) => {
+                recordToDelete = id;
+                document.getElementById('deleteModal').classList.remove('hidden');
+                document.getElementById('deleteModal').classList.add('flex');
+            };
+
+            window.confirmDelete = async () => {
+                if (!recordToDelete) return;
+                const confirmBtn = document.getElementById('confirmDeleteBtn');
+                const originalHtml = confirmBtn.innerHTML;
+                
+                confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+                confirmBtn.disabled = true;
+
                 try {
                     const res = await fetch(GOOGLE_WEB_APP_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ action: "delete", id: id })
+                        body: JSON.stringify({ action: "delete", id: recordToDelete })
                     });
                     const json = await res.json();
                     
@@ -862,6 +931,12 @@
                     }
                 } catch(e) {
                     window.showToast("Connection error while deleting.", "error");
+                } finally {
+                    confirmBtn.innerHTML = originalHtml;
+                    confirmBtn.disabled = false;
+                    document.getElementById('deleteModal').classList.add('hidden');
+                    document.getElementById('deleteModal').classList.remove('flex');
+                    recordToDelete = null;
                 }
             };
 
@@ -925,6 +1000,8 @@
                 submitBtn.classList.replace('hover:bg-blue-900', 'hover:bg-emerald-800');
                 cancelEditBtn.classList.remove('hidden');
                 cancelEditBtn.classList.add('flex');
+                clearFormBtn.classList.add('hidden');
+                clearFormBtn.classList.remove('flex');
 
                 window.showToast("Record loaded for editing.", "success");
                 window.scrollTo({top: 0, behavior: 'smooth'});
@@ -952,6 +1029,23 @@
                 submitBtn.classList.replace('hover:bg-emerald-800', 'hover:bg-blue-900');
                 cancelEditBtn.classList.add('hidden');
                 cancelEditBtn.classList.remove('flex');
+                clearFormBtn.classList.remove('hidden');
+                clearFormBtn.classList.add('flex');
+            };
+
+            window.clearForm = () => {
+                document.getElementById('auditForm').reset();
+                document.getElementById('dateAdmission').valueAsDate = new Date();
+                
+                document.querySelectorAll('.audit-select').forEach(sel => sel.value = 'N/A');
+                document.querySelectorAll('.ros-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    window.toggleRosNote(cb.id.split('_')[1]);
+                });
+                
+                window.calculateScore();
+                window.showToast("Form cleared.", "success");
+                window.scrollTo({top: 0, behavior: 'smooth'});
             };
 
             window.openReviewModal = (id) => {
@@ -1124,26 +1218,51 @@
             };
 
             window.logout = () => {
-                if(!confirm("Are you sure you want to sign out?")) return;
+                // Show the custom modal instead of the ugly browser confirm
+                document.getElementById('logoutModal').classList.remove('hidden');
+                document.getElementById('logoutModal').classList.add('flex');
+            };
+
+            window.confirmLogout = () => {
+                const username = sessionStorage.getItem('tdmsh_user') || 'USER';
+                const confirmBtn = document.getElementById('confirmLogoutBtn');
+                const originalHtml = confirmBtn.innerHTML;
                 
-                // Clear session memory
-                sessionStorage.removeItem('tdmsh_logged_in');
-                sessionStorage.removeItem('tdmsh_user');
-                
-                // Reset Forms
-                document.getElementById('loginForm').reset();
-                if(editingId) window.cancelEdit();
-                else document.getElementById('auditForm').reset();
-                
-                // Switch UI back to login
-                const mainApp = document.getElementById('mainAppWrapper');
-                const loginOverlay = document.getElementById('loginOverlay');
-                
-                mainApp.classList.add('hidden');
-                mainApp.classList.remove('flex');
-                
-                loginOverlay.classList.remove('hidden');
-                setTimeout(() => loginOverlay.classList.remove('opacity-0'), 50);
+                // Show Animation
+                confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing Out...';
+                confirmBtn.disabled = true;
+
+                setTimeout(() => {
+                    // Hide modal
+                    document.getElementById('logoutModal').classList.add('hidden');
+                    document.getElementById('logoutModal').classList.remove('flex');
+                    
+                    // Clear session memory
+                    sessionStorage.removeItem('tdmsh_logged_in');
+                    sessionStorage.removeItem('tdmsh_user');
+                    
+                    // Reset Forms
+                    document.getElementById('loginForm').reset();
+                    if(editingId) window.cancelEdit();
+                    else document.getElementById('auditForm').reset();
+                    
+                    // Switch UI back to login
+                    const mainApp = document.getElementById('mainAppWrapper');
+                    const loginOverlay = document.getElementById('loginOverlay');
+                    
+                    mainApp.classList.add('hidden');
+                    mainApp.classList.remove('flex');
+                    
+                    loginOverlay.classList.remove('hidden');
+                    setTimeout(() => loginOverlay.classList.remove('opacity-0'), 50);
+
+                    // Reset button state for next time
+                    confirmBtn.innerHTML = originalHtml;
+                    confirmBtn.disabled = false;
+
+                    // Show Goodbye Toast
+                    window.showToast(`Goodbye and thank you for using the CDI system, ${username}.`, "success");
+                }, 600); // 0.6 second delay to let the animation play
             };
 
             function escapeHtml(unsafe) { return (unsafe || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
