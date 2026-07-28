@@ -29,7 +29,6 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-[100] transition-opacity duration-300 px-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full flex flex-col items-center">
             <div class="bg-blue-100 p-4 rounded-full text-blue-800 mb-4">
@@ -54,9 +53,7 @@
         </div>
     </div>
 
-    <!-- Main App Wrapper -->
     <div id="mainAppWrapper" class="hidden flex-col min-h-screen w-full">
-        <!-- Header -->
         <header class="bg-blue-800 text-white shadow-md relative z-10">
             <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
                 <div class="flex items-center gap-3">
@@ -78,7 +75,6 @@
 
         <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6 sm:gap-8 overflow-x-hidden">
             <form id="auditForm" class="flex flex-col gap-6">
-                <!-- Patient Demographics & Info -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">Patient Details</div>
                     <div class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -113,7 +109,6 @@
                     </div>
                 </div>
 
-                <!-- Checklist Table -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full max-w-full">
                     <div class="table-container overflow-x-auto w-full">
                         <table class="w-full text-sm text-left whitespace-nowrap sm:whitespace-normal">
@@ -134,7 +129,6 @@
                                     <td class="px-4 py-3 text-sm text-slate-500">/ 20</td>
                                 </tr>
                                 <tr>
-                                    <!-- This row spans across the bottom to show the Highly Detailed Result -->
                                     <td colspan="5" class="p-0 border-t border-slate-200">
                                         <div id="resultDisplay" class="px-6 py-4 font-bold text-lg w-full text-slate-400 text-center">
                                             Please answer the checklist to generate a detailed result.
@@ -146,7 +140,6 @@
                     </div>
                 </div>
 
-                <!-- ROS and Summaries -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-full">
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full w-full">
                         <div class="bg-slate-50 px-4 sm:px-5 py-3 border-b border-slate-200 font-semibold text-slate-700 flex justify-between items-center">
@@ -189,7 +182,6 @@
                 </div>
             </form>
 
-            <!-- Dashboard / Audit Log (LIVE SYNCED) -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-2 sm:mt-8 w-full max-w-full">
                 <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
@@ -200,13 +192,19 @@
                         <button type="button" onclick="window.fetchLiveAudits()" class="bg-blue-100 text-blue-800 text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
                             <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i> Verify Sync
                         </button>
+                        
+                        <!-- New Import Button -->
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="window.importFromCSV(event)">
+                        <button type="button" onclick="document.getElementById('csvFileInput').click()" class="bg-indigo-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
+                            <i class="fa-solid fa-file-import"></i> Import (CSV)
+                        </button>
+
                         <button type="button" onclick="window.exportToCSV()" class="bg-emerald-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
                             <i class="fa-solid fa-file-excel"></i> Export (CSV)
                         </button>
                     </div>
                 </div>
 
-                <!-- Dashboard Stats Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border-b border-slate-100 bg-slate-50">
                     <div class="bg-white p-3 rounded border border-slate-200 text-center shadow-sm">
                         <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Audits</div>
@@ -249,7 +247,7 @@
                     <div id="emptyState" class="hidden p-12 text-center flex flex-col items-center justify-center text-slate-500">
                         <div class="bg-slate-100 p-4 rounded-full mb-3"><i class="fa-solid fa-folder-open text-3xl text-slate-400"></i></div>
                         <h3 class="text-lg font-medium text-slate-700">No Audits Found in Database</h3>
-                        <p class="text-sm">Submit your first audit to start populating records.</p>
+                        <p class="text-sm">Submit your first audit or import a CSV backup to start populating records.</p>
                     </div>
                 </div>
             </div>
@@ -621,7 +619,6 @@
             loginError.classList.add('hidden');
 
             try {
-                // Ensure Firebase auth prior to querying database
                 let token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 if (token) {
                     await signInWithCustomToken(auth, token);
@@ -639,7 +636,7 @@
                         loginOverlay.classList.add('hidden');
                         mainAppWrapper.classList.remove('hidden');
                         mainAppWrapper.classList.add('flex');
-                        setupLiveSync(); // Kickoff Firestore snapshot
+                        setupLiveSync();
                     }, 300);
                 }
             } catch (error) {
@@ -658,14 +655,12 @@
             tableLoading.classList.remove('hidden');
             emptyState.classList.add('hidden');
             
-            // Set up real-time listener
             onSnapshot(auditsRef, (snapshot) => {
                 liveAudits = [];
                 snapshot.forEach(doc => {
                     liveAudits.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Keep the freshest items on top
                 liveAudits.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 
                 renderTable();
@@ -679,7 +674,6 @@
         }
 
         window.fetchLiveAudits = () => {
-            // Trigger a manual feedback since onSnapshot is already active
             document.getElementById('refreshIcon').classList.add('fa-spin');
             renderTable();
             setTimeout(() => document.getElementById('refreshIcon').classList.remove('fa-spin'), 500);
@@ -807,12 +801,10 @@
                 familyHistory: document.getElementById('familyHistory').value.trim(),
                 socialHistory: document.getElementById('socialHistory').value.trim(),
                 summary: document.getElementById('summary').value.trim(),
-                // Keep original timestamp if editing
                 createdAt: editingId ? (liveAudits.find(a => a.id === editingId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
             };
 
             try {
-                // Ensure authentication barrier before query execution
                 await setDoc(doc(auditsRef, docId), auditData);
                 window.showToast(editingId ? "Audit securely updated!" : "Audit securely saved to Database!");
                 window.cancelEdit(); 
@@ -861,6 +853,7 @@
                 cb.checked = false;
                 window.toggleRosNote(cb.id.split('_')[1]);
             });
+            
             if (audit.ros && audit.ros.length > 0) {
                 audit.ros.forEach(r => {
                     const cb = Array.from(document.querySelectorAll('.ros-checkbox')).find(c => c.value === r.system);
@@ -909,22 +902,112 @@
             cancelEditBtn.classList.add('hidden');
         };
 
+        // Advanced Export: Includes a base64 encoded backup payload in the final column to allow perfect data restoration for reviewing and editing later.
         window.exportToCSV = () => {
             if (liveAudits.length === 0) { window.showToast("No data to export.", "error"); return; }
-            const headers = ["System ID", "Date Created", "Patient Name", "Age", "Admission Date", "Score", "Failed Items (No's)", "Result"];
+            
+            // Added Raw Backup Data column to support importing for full reviews/edits
+            const headers = ["System ID", "Date Created", "Patient Name", "Age", "Admission Date", "Score", "Failed Items (No's)", "Result", "Raw_Backup_Data_DO_NOT_EDIT"];
             const rows = liveAudits.map(a => {
                 let noCount = 0;
                 if (a.checklist) noCount = Object.values(a.checklist).filter(v => v === 'No').length;
                 else if (a.autoActions) noCount = a.autoActions.length;
                 
-                return [`"${a.id}"`, `"${a.createdAt}"`, `"${a.patientName}"`, a.age, `"${a.dateAdmission}"`, a.score, noCount, `"${a.result}"`];
+                // Crucial step: we serialize and base64 encode the complete original object so it survives CSV formatting natively.
+                const rawData = btoa(encodeURIComponent(JSON.stringify(a)));
+
+                return [`"${a.id}"`, `"${a.createdAt}"`, `"${escapeHtml(a.patientName)}"`, a.age, `"${a.dateAdmission}"`, a.score, noCount, `"${a.result}"`, `"${rawData}"`];
             });
+            
             const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
             const link = document.createElement("a");
             link.setAttribute("href", encodeURI(csvContent));
-            link.setAttribute("download", `TDMSH_Audits_Export.csv`);
+            link.setAttribute("download", `TDMSH_Audits_Export_Editable.csv`);
             document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            window.showToast("CSV Downloaded. Keep the raw data column intact to re-import later.");
         };
+
+        // Simple CSV Parser logic tailored for extracting the encoded payload
+        function parseCSV(text) {
+            let rows = [];
+            let row = [];
+            let inQuotes = false;
+            let val = '';
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"' && text[i+1] === '"') { val += '"'; i++; } // escaped quote
+                else if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === ',' && !inQuotes) { row.push(val); val = ''; }
+                else if (char === '\n' && !inQuotes) { row.push(val); rows.push(row); row = []; val = ''; }
+                else if (char !== '\r') { val += char; }
+            }
+            if (val || row.length > 0) { row.push(val); rows.push(row); }
+            return rows;
+        }
+
+        // New Import Function: Extracts the raw data column and restores the records for editing
+        window.importFromCSV = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            window.showToast("Processing CSV file...");
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                try {
+                    const text = e.target.result;
+                    const rows = parseCSV(text);
+                    
+                    if (rows.length < 2) {
+                        window.showToast("Invalid or empty CSV file.", "error");
+                        return;
+                    }
+
+                    const headerRow = rows[0];
+                    const rawDataIndex = headerRow.findIndex(h => h.includes("Raw_Backup_Data_DO_NOT_EDIT"));
+
+                    if (rawDataIndex === -1) {
+                        window.showToast("This CSV lacks the 'Raw_Backup_Data' column. Cannot restore full edit details.", "error");
+                        return;
+                    }
+
+                    let importCount = 0;
+                    
+                    for (let i = 1; i < rows.length; i++) {
+                        if (rows[i].length <= rawDataIndex) continue; 
+                        
+                        // Remove leading/trailing quotes added by CSV formatting
+                        const rawCell = rows[i][rawDataIndex].replace(/^"|"$/g, ''); 
+                        if (!rawCell) continue;
+
+                        try {
+                            const auditObj = JSON.parse(decodeURIComponent(atob(rawCell)));
+                            // Push directly into Firebase to ensure it syncs across the system
+                            if(auth.currentUser) {
+                                await setDoc(doc(auditsRef, auditObj.id), auditObj);
+                                importCount++;
+                            }
+                        } catch(err) {
+                            console.warn("Failed to parse row " + i, err);
+                        }
+                    }
+
+                    if (importCount > 0) {
+                        window.showToast(`Successfully imported ${importCount} records. You can now review and edit them.`, "success");
+                    } else {
+                        window.showToast("No valid records found to import.", "error");
+                    }
+                    
+                    event.target.value = ''; // Reset input
+                } catch (error) {
+                    console.error("Import error", error);
+                    window.showToast("Failed to process CSV file.", "error");
+                }
+            };
+            
+            reader.readAsText(file);
+        };
+
 
         window.openReviewModal = (id) => {
             const audit = liveAudits.find(a => a.id === id);
@@ -964,7 +1047,6 @@
             document.getElementById('dateAdmission').valueAsDate = new Date();
             initChecklistUI();
 
-            // Try to restore an existing session
             if (sessionStorage.getItem('tdmsh_logged_in') === 'true') {
                 const user = sessionStorage.getItem('tdmsh_user') || 'USER';
                 document.getElementById('displayUsername').textContent = user;
@@ -972,7 +1054,6 @@
                 mainAppWrapper.classList.remove('hidden');
                 mainAppWrapper.classList.add('flex');
                 
-                // Refresh auth state smoothly behind the scenes
                 (async () => {
                     try {
                         let token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -982,7 +1063,7 @@
                             await signInAnonymously(auth);
                         }
                         if (auth.currentUser) {
-                            setupLiveSync(); // Safe connection establishment
+                            setupLiveSync();
                         }
                     } catch(e) {
                         console.error("Session re-auth failed, please login again", e);
