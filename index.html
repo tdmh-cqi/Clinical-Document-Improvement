@@ -29,7 +29,6 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-[100] transition-opacity duration-300 px-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full flex flex-col items-center">
             <div class="bg-blue-100 p-4 rounded-full text-blue-800 mb-4">
@@ -54,7 +53,6 @@
         </div>
     </div>
 
-    <!-- Main App Wrapper -->
     <div id="mainAppWrapper" class="hidden flex-col min-h-screen w-full">
         <!-- Header -->
         <header class="bg-blue-800 text-white shadow-md relative z-10">
@@ -66,12 +64,12 @@
                         <p class="text-blue-200 text-xs font-medium uppercase tracking-wider">Clinical Documents Improvement (CDI)</p>
                     </div>
                 </div>
-                <div class="text-sm font-medium text-blue-200 bg-blue-900 px-3 py-1.5 rounded-full">
-                    <i class="fa-solid fa-user text-xs mr-1"></i> <span id="displayUsername" class="text-white font-bold tracking-wider"></span>
+                <div class="text-sm font-medium text-blue-200 bg-blue-900 px-3 py-1.5 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-user text-xs"></i> <span id="displayUsername" class="text-white font-bold tracking-wider"></span>
                 </div>
             </div>
-            <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                <h2 id="formHeaderTitle" class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
+            <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex justify-between items-center transition-all duration-300" id="formHeaderContainer">
+                <h2 id="formHeaderTitle" class="text-lg font-semibold text-slate-800 flex items-center"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
                 <div id="liveScoreBadge" class="hidden px-3 py-1 rounded-full text-xs sm:text-sm font-bold border"></div>
             </div>
         </header>
@@ -113,7 +111,6 @@
                     </div>
                 </div>
 
-                <!-- Checklist Table -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full max-w-full">
                     <div class="table-container overflow-x-auto w-full">
                         <table class="w-full text-sm text-left whitespace-nowrap sm:whitespace-normal">
@@ -134,7 +131,6 @@
                                     <td class="px-4 py-3 text-sm text-slate-500">/ 20</td>
                                 </tr>
                                 <tr>
-                                    <!-- This row spans across the bottom to show the Highly Detailed Result -->
                                     <td colspan="5" class="p-0 border-t border-slate-200">
                                         <div id="resultDisplay" class="px-6 py-4 font-bold text-lg w-full text-slate-400 text-center">
                                             Please answer the checklist to generate a detailed result.
@@ -146,7 +142,6 @@
                     </div>
                 </div>
 
-                <!-- ROS and Summaries -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-full">
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full w-full">
                         <div class="bg-slate-50 px-4 sm:px-5 py-3 border-b border-slate-200 font-semibold text-slate-700 flex justify-between items-center">
@@ -159,9 +154,9 @@
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
                             <div class="bg-slate-50 px-4 sm:px-5 py-3 border-b border-slate-200 font-semibold text-slate-700">F. Past, Family, and Social History</div>
                             <div class="p-4 sm:p-5 flex flex-col gap-4">
-                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Past History</label><textarea id="pastHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2"></textarea></div>
-                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Family History</label><textarea id="familyHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2"></textarea></div>
-                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Social History</label><textarea id="socialHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2"></textarea></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Past History</label><textarea id="pastHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500"></textarea></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Family History</label><textarea id="familyHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500"></textarea></div>
+                                <div><label class="block text-sm font-medium text-slate-700 mb-1">Social History</label><textarea id="socialHistory" rows="2" class="w-full rounded-md border-slate-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500"></textarea></div>
                             </div>
                         </div>
 
@@ -173,14 +168,14 @@
                                 </button>
                             </div>
                             <div class="p-4 sm:p-5 flex-grow flex flex-col">
-                                <textarea id="summary" class="w-full h-full min-h-[150px] rounded-md border-slate-300 shadow-sm border p-3 resize-y font-mono text-sm leading-relaxed" placeholder="Click 'Auto-Generate Report' or enter final summary here..."></textarea>
+                                <textarea id="summary" class="w-full h-full min-h-[150px] rounded-md border-slate-300 shadow-sm border p-3 resize-y font-mono text-sm leading-relaxed focus:ring-blue-500 focus:border-blue-500" placeholder="Click 'Auto-Generate Report' or enter final summary here..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-4 border-t border-slate-200 gap-4">
-                    <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden w-full sm:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 text-lg">
+                <div class="flex flex-col sm:flex-row justify-end pt-4 border-t border-slate-200 gap-4">
+                    <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden w-full sm:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors items-center justify-center gap-2 text-lg">
                         <i class="fa-solid fa-xmark"></i> Cancel Edit
                     </button>
                     <button type="submit" id="submitBtn" class="w-full sm:w-auto bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 text-lg">
@@ -190,10 +185,10 @@
             </form>
 
             <!-- Dashboard / Audit Log (LIVE SYNCED) -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-2 sm:mt-8 w-full max-w-full">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-2 sm:mt-4 w-full max-w-full">
                 <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-database text-blue-600"></i> Live Database Audits
+                        <i class="fa-solid fa-server text-blue-600"></i> Live Database Audits
                     </h2>
                     
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -201,7 +196,7 @@
                             <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i> Sync Sheet
                         </button>
                         <button type="button" onclick="exportToCSV()" class="bg-emerald-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
-                            <i class="fa-solid fa-file-excel"></i> Export (CSV)
+                            <i class="fa-solid fa-file-csv"></i> Export (CSV)
                         </button>
                     </div>
                 </div>
@@ -400,6 +395,7 @@
             const tableLoading = document.getElementById('tableLoading');
             const emptyState = document.getElementById('emptyState');
             const formHeaderTitle = document.getElementById('formHeaderTitle');
+            const formHeaderContainer = document.getElementById('formHeaderContainer');
             const submitBtn = document.getElementById('submitBtn');
             const cancelEditBtn = document.getElementById('cancelEditBtn');
             
@@ -696,7 +692,7 @@
             window.showToast = function(message, type = 'success') {
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-500' : 'fa-circle-exclamation text-red-500';
-                toast.className = `toast-enter bg-white border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'} shadow-lg rounded p-4 flex items-center gap-3 min-w-[280px] sm:min-w-[300px] text-slate-800`;
+                toast.className = `toast-enter bg-white border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'} shadow-lg rounded p-4 flex items-center gap-3 min-w-[280px] sm:min-w-[300px] text-slate-800 z-50`;
                 toast.innerHTML = `<i class="fa-solid ${icon} text-xl"></i><div class="flex-grow font-medium text-sm">${message}</div><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>`;
                 document.getElementById('toastContainer').appendChild(toast);
                 setTimeout(() => { toast.classList.replace('toast-enter', 'toast-exit'); setTimeout(() => toast.remove(), 300); }, 4000);
@@ -774,7 +770,6 @@
                     const json = await res.json();
                     
                     liveAudits = json.data || [];
-                    
                     updateDashboardStats(liveAudits);
 
                     if (liveAudits.length === 0) {
@@ -783,7 +778,14 @@
                         liveAudits.forEach(audit => {
                             const tr = document.createElement('tr');
                             tr.className = "hover:bg-slate-50 transition-colors group border-b";
-                            const admDate = audit.dateAdmission ? new Date(audit.dateAdmission).toLocaleDateString() : 'N/A';
+                            
+                            // Safe parsing of date
+                            let admDate = 'N/A';
+                            if (audit.dateAdmission) {
+                                const parsedDate = new Date(audit.dateAdmission);
+                                if (!isNaN(parsedDate.getTime())) admDate = parsedDate.toLocaleDateString();
+                                else admDate = audit.dateAdmission.split('T')[0]; // Fallback for raw strings
+                            }
                             
                             let badgeClass = 'bg-slate-100 text-slate-800 border-slate-300';
                             if (audit.result === 'PASS') badgeClass = 'bg-green-100 text-green-800 border-green-300';
@@ -802,27 +804,27 @@
                                 });
                             }
                             
-                            const displayScore = (audit.score && audit.score > 0) ? audit.score : calculatedFallbackScore;
+                            const displayScore = (audit.score !== undefined && audit.score !== "") ? audit.score : calculatedFallbackScore;
                             
                             let noCountDisplay = failedQuestions.length > 0 
                                 ? `<div class="font-bold text-lg text-red-600">${failedQuestions.length}</div><div class="text-xs text-red-500 whitespace-normal max-w-[120px] mx-auto leading-tight mt-1">${failedQuestions.join(', ')}</div>`
                                 : `<span class="font-bold text-lg text-slate-400">0</span>`;
 
                             tr.innerHTML = `
-                                <td class="px-4 py-3 align-middle whitespace-normal min-w-[150px]"><div class="font-bold text-slate-800">${escapeHtml(audit.patientName)}</div><div class="text-xs text-slate-500">Age: ${audit.age}</div></td>
+                                <td class="px-4 py-3 align-middle whitespace-normal min-w-[150px]"><div class="font-bold text-slate-800">${escapeHtml(audit.patientName)}</div><div class="text-xs text-slate-500">Age: ${audit.age || 'N/A'}</div></td>
                                 <td class="px-4 py-3 align-middle text-sm text-slate-700">${admDate}</td>
                                 <td class="px-4 py-3 align-middle text-center"><span class="font-bold text-lg">${displayScore}</span><span class="text-xs text-slate-500">/20</span></td>
                                 <td class="px-4 py-3 align-middle text-center">${noCountDisplay}</td>
-                                <td class="px-4 py-3 align-middle whitespace-normal"><span class="px-2 py-1 rounded border text-xs font-bold ${badgeClass}">${audit.result}</span></td>
+                                <td class="px-4 py-3 align-middle whitespace-normal"><span class="px-2 py-1 rounded border text-xs font-bold ${badgeClass}">${audit.result || 'N/A'}</span></td>
                                 <td class="px-4 py-3 align-middle text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <button onclick="window.openReviewModal('${audit.id}')" class="text-blue-500 hover:text-blue-700 transition-colors p-2 rounded-full hover:bg-blue-50 border border-transparent hover:border-blue-200" title="Review Complete Audit Data">
+                                        <button type="button" onclick="window.openReviewModal('${audit.id}')" class="text-blue-500 hover:text-blue-700 transition-colors p-2 rounded-full hover:bg-blue-50 border border-transparent hover:border-blue-200" title="Review Complete Audit Data">
                                             <i class="fa-solid fa-eye text-lg"></i>
                                         </button>
-                                        <button onclick="window.editLiveRecord('${audit.id}')" class="text-emerald-500 hover:text-emerald-700 transition-colors p-2 rounded-full hover:bg-emerald-50 border border-transparent hover:border-emerald-200" title="Edit Record">
+                                        <button type="button" onclick="window.editLiveRecord('${audit.id}')" class="text-emerald-500 hover:text-emerald-700 transition-colors p-2 rounded-full hover:bg-emerald-50 border border-transparent hover:border-emerald-200" title="Edit Record">
                                             <i class="fa-solid fa-pencil text-lg"></i>
                                         </button>
-                                        <button onclick="window.deleteLiveRecord('${audit.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50 border border-transparent hover:border-red-200" title="Delete from live sheet">
+                                        <button type="button" onclick="window.deleteLiveRecord('${audit.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50 border border-transparent hover:border-red-200" title="Delete from live sheet">
                                             <i class="fa-solid fa-trash-can text-lg"></i>
                                         </button>
                                     </div>
@@ -871,11 +873,14 @@
                 
                 document.getElementById('patientName').value = audit.patientName || '';
                 document.getElementById('age').value = audit.age || '';
-                document.getElementById('dateAdmission').value = audit.dateAdmission || '';
+                
+                // Fix date inputs (needs YYYY-MM-DD format)
+                if(audit.dateAdmission) document.getElementById('dateAdmission').value = audit.dateAdmission.split('T')[0];
+                if(audit.dateDischarge) document.getElementById('dateDischarge').value = audit.dateDischarge.split('T')[0];
+                
                 document.getElementById('chiefComplaint').value = audit.chiefComplaint || '';
                 document.getElementById('admittingDiagnosis').value = audit.admittingDiagnosis || '';
                 document.getElementById('finalDiagnosis').value = audit.finalDiagnosis || '';
-                document.getElementById('dateDischarge').value = audit.dateDischarge || '';
                 
                 if (audit.checklist) {
                     Object.keys(audit.checklist).forEach(key => {
@@ -907,13 +912,18 @@
                 document.getElementById('summary').value = audit.summary || '';
 
                 window.calculateScore();
-                formHeaderTitle.innerHTML = `<i class="fa-solid fa-pencil text-emerald-600 mr-2"></i>Edit Audit: ${escapeHtml(audit.patientName)}`;
+                
+                // Visual Edit State Updates
+                formHeaderTitle.innerHTML = `<i class="fa-solid fa-pencil text-emerald-600 mr-2"></i>Editing Audit: ${escapeHtml(audit.patientName)}`;
+                formHeaderContainer.classList.add('bg-emerald-50', 'border-emerald-200');
+                
                 submitBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Update Audit Data';
                 submitBtn.classList.replace('bg-blue-800', 'bg-emerald-700');
                 submitBtn.classList.replace('hover:bg-blue-900', 'hover:bg-emerald-800');
                 cancelEditBtn.classList.remove('hidden');
+                cancelEditBtn.classList.add('flex');
 
-                window.showToast("Record data fully loaded into form for editing.", "success");
+                window.showToast("Record loaded for editing.", "success");
                 window.scrollTo({top: 0, behavior: 'smooth'});
             };
 
@@ -930,14 +940,17 @@
                 
                 window.calculateScore();
                 
+                // Visual Revert State
                 formHeaderTitle.innerHTML = `<i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit`;
+                formHeaderContainer.classList.remove('bg-emerald-50', 'border-emerald-200');
+                
                 submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Audit to Live Database';
                 submitBtn.classList.replace('bg-emerald-700', 'bg-blue-800');
                 submitBtn.classList.replace('hover:bg-emerald-800', 'hover:bg-blue-900');
                 cancelEditBtn.classList.add('hidden');
+                cancelEditBtn.classList.remove('flex');
             };
 
-            // Display FULL Saved Data in Review Modal
             window.openReviewModal = (id) => {
                 const audit = liveAudits.find(a => a.id === id);
                 if (!audit) return;
@@ -948,23 +961,28 @@
                         if (audit.checklist[key] === 'Yes') calculatedFallbackScore++;
                     });
                 }
-                const displayScore = (audit.score && audit.score > 0) ? audit.score : calculatedFallbackScore;
+                const displayScore = (audit.score !== undefined && audit.score !== "") ? audit.score : calculatedFallbackScore;
 
-                // 1. Demographics & Quick Info
                 document.getElementById('revPatient').textContent = escapeHtml(audit.patientName) + ` (Age: ${audit.age || 'N/A'})`;
-                document.getElementById('revAdm').textContent = audit.dateAdmission ? new Date(audit.dateAdmission).toLocaleDateString() : 'N/A';
+                
+                let admDate = 'N/A';
+                if(audit.dateAdmission) {
+                   const d = new Date(audit.dateAdmission);
+                   admDate = isNaN(d) ? audit.dateAdmission.split('T')[0] : d.toLocaleDateString();
+                }
+                
+                document.getElementById('revAdm').textContent = admDate;
                 document.getElementById('revScore').textContent = displayScore + ' / 20';
                 document.getElementById('revAdmittingDx').textContent = audit.admittingDiagnosis || 'Not specified';
                 document.getElementById('revChiefComplaint').textContent = audit.chiefComplaint || 'Not specified';
                 
                 const resBadge = document.getElementById('revResult');
-                resBadge.textContent = audit.result;
+                resBadge.textContent = audit.result || 'N/A';
                 resBadge.className = 'font-semibold px-3 py-1 rounded-full text-xs border inline-block ';
                 if (audit.result === 'PASS') resBadge.className += 'bg-green-100 text-green-800 border-green-300';
                 else if (audit.result === 'QUERY NEEDED') resBadge.className += 'bg-yellow-100 text-yellow-800 border-yellow-300';
                 else resBadge.className += 'bg-red-100 text-red-800 border-red-300';
 
-                // 2. Populate Full Saved Checklist
                 const revChecklistTbody = document.getElementById('revChecklistTable');
                 revChecklistTbody.innerHTML = '';
                 
@@ -991,7 +1009,6 @@
                     revChecklistTbody.innerHTML = '<tr><td class="p-4 text-center text-slate-400 italic">No checklist data found for this audit.</td></tr>';
                 }
 
-                // 3. Populate ROS
                 const revRosContainer = document.getElementById('revRosContainer');
                 revRosContainer.innerHTML = '';
                 if (audit.ros && audit.ros.length > 0) {
@@ -1007,23 +1024,19 @@
                     revRosContainer.innerHTML = '<div class="text-slate-400 italic text-sm">No Review of Systems noted.</div>';
                 }
 
-                // 4. Populate Histories
                 document.getElementById('revPastHist').textContent = audit.pastHistory || 'Not recorded';
                 document.getElementById('revFamHist').textContent = audit.familyHistory || 'Not recorded';
                 document.getElementById('revSocHist').textContent = audit.socialHistory || 'Not recorded';
 
-                // 5. Populate Summary
                 let summaryText = audit.summary || "No detailed summary was generated for this audit before it was saved.";
                 if (!audit.summary && audit.autoActions && audit.autoActions.length > 0) {
                     summaryText = "Saved Actions log:\n\n" + audit.autoActions.join('\n');
                 }
                 document.getElementById('revSummary').textContent = summaryText;
 
-                // Setup the 'Edit this Audit' button inside the modal to jump straight to editing
                 const editBtn = document.getElementById('revEditBtn');
                 editBtn.onclick = () => window.editLiveRecord(audit.id);
 
-                // Show Modal
                 document.getElementById('reviewModal').classList.remove('hidden');
                 document.getElementById('reviewModal').classList.add('flex');
             };
@@ -1098,7 +1111,7 @@
                     if (a.checklist) noCount = Object.values(a.checklist).filter(v => v === 'No').length;
                     else if (a.autoActions) noCount = a.autoActions.length;
                     
-                    return [`"${a.id}"`, `"${a.createdAt}"`, `"${a.patientName}"`, a.age, `"${a.dateAdmission}"`, a.score, noCount, `"${a.result}"`];
+                    return [`"${a.id}"`, `"${a.createdAt}"`, `"${a.patientName}"`, a.age || 0, `"${a.dateAdmission}"`, a.score || 0, noCount, `"${a.result}"`];
                 });
                 const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
                 const link = document.createElement("a");
