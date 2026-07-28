@@ -67,6 +67,9 @@
                 <div class="text-sm font-medium text-blue-200 bg-blue-900 px-3 py-1.5 rounded-full flex items-center gap-2">
                     <i class="fa-solid fa-user text-xs"></i> <span id="displayUsername" class="text-white font-bold tracking-wider"></span>
                 </div>
+                <button type="button" onclick="window.logout()" class="bg-blue-900 hover:bg-red-600 text-blue-200 hover:text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Sign Out</span>
+                </button>
             </div>
             <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex justify-between items-center transition-all duration-300" id="formHeaderContainer">
                 <h2 id="formHeaderTitle" class="text-lg font-semibold text-slate-800 flex items-center"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
@@ -1118,6 +1121,29 @@
                 link.setAttribute("href", encodeURI(csvContent));
                 link.setAttribute("download", `TDMSH_Audits_Export.csv`);
                 document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            };
+
+            window.logout = () => {
+                if(!confirm("Are you sure you want to sign out?")) return;
+                
+                // Clear session memory
+                sessionStorage.removeItem('tdmsh_logged_in');
+                sessionStorage.removeItem('tdmsh_user');
+                
+                // Reset Forms
+                document.getElementById('loginForm').reset();
+                if(editingId) window.cancelEdit();
+                else document.getElementById('auditForm').reset();
+                
+                // Switch UI back to login
+                const mainApp = document.getElementById('mainAppWrapper');
+                const loginOverlay = document.getElementById('loginOverlay');
+                
+                mainApp.classList.add('hidden');
+                mainApp.classList.remove('flex');
+                
+                loginOverlay.classList.remove('hidden');
+                setTimeout(() => loginOverlay.classList.remove('opacity-0'), 50);
             };
 
             function escapeHtml(unsafe) { return (unsafe || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
