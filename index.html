@@ -71,7 +71,7 @@
                 </div>
             </div>
             <div class="bg-slate-50 px-4 sm:px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
+                <h2 id="formHeaderTitle" class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit</h2>
                 <div id="liveScoreBadge" class="hidden px-3 py-1 rounded-full text-xs sm:text-sm font-bold border"></div>
             </div>
         </header>
@@ -179,7 +179,10 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-4 border-t border-slate-200">
+                <div class="flex justify-end pt-4 border-t border-slate-200 gap-4">
+                    <button type="button" id="cancelEditBtn" onclick="window.cancelEdit()" class="hidden w-full sm:w-auto bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 text-lg">
+                        <i class="fa-solid fa-xmark"></i> Cancel Edit
+                    </button>
                     <button type="submit" id="submitBtn" class="w-full sm:w-auto bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 text-lg">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Save Audit to Live Database
                     </button>
@@ -292,6 +295,7 @@
             let liveAudits = [];
             let currentScore = 0;
             let currentResult = "-";
+            let editingId = null; // Track ID when in Edit Mode
 
             const loginOverlay = document.getElementById('loginOverlay');
             const mainAppWrapper = document.getElementById('mainAppWrapper');
@@ -301,6 +305,9 @@
             const tableBody = document.getElementById('auditTableBody');
             const tableLoading = document.getElementById('tableLoading');
             const emptyState = document.getElementById('emptyState');
+            const formHeaderTitle = document.getElementById('formHeaderTitle');
+            const submitBtn = document.getElementById('submitBtn');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
             
             document.getElementById('dateAdmission').valueAsDate = new Date();
 
@@ -308,7 +315,7 @@
                 { id: 'q1', group: 'A. CHIEF COMPLAINT', text: "CC documented in patient's own words", noAction: "SEND QUERY: Specify CC with duration", hint: "Look at Admission/ER notes. Is there a quote like 'my stomach hurts' instead of just medical terms?" },
                 { id: 'q2', group: 'A. CHIEF COMPLAINT', text: "CC has duration", noAction: "SEND QUERY: Add x__ days", hint: "Look for time words near the main complaint (e.g., 'for 3 days', 'since yesterday')." },
                 { id: 'q3', group: 'A. CHIEF COMPLAINT', text: "CC has severity/character", noAction: "SEND QUERY: Severe? Colicky?", hint: "Look for describing words like 'severe', 'sharp', 'cramping', or a pain scale number (e.g., '8/10')." },
-                { id: 'q4', group: 'A. CHIEF COMPLAINT', text: "CC supports need for admission", noAction: "RTH RISK: OPD case?", hint: "Does the complaint sound serious enough to need a hospital bed right away?" },
+                { id: 'q4', group: 'A. CHIEF COMPLAINT', text: "CC supports need for admission", noAction: "RTH RISK: OPD case?", hint: "Does the complaint sound serious enough to need a hospital bed right away?", isPro: true },
                 { id: 'q5', group: 'B. HISTORY OF PRESENT ILLNESS (HPI)', text: "Location documented", noAction: "SEND QUERY: Where is the symptom located?", hint: "Look at the HPI section. Does it say exactly where it hurts? (e.g., 'lower right side of stomach')." },
                 { id: 'q6', group: 'B. HISTORY OF PRESENT ILLNESS (HPI)', text: "Quality/character documented", noAction: "SEND QUERY: Describe quality (sharp, dull, etc.)", hint: "Look for descriptive words about the symptom (e.g., 'burning', 'aching', 'throbbing')." },
                 { id: 'q7', group: 'B. HISTORY OF PRESENT ILLNESS (HPI)', text: "Severity documented", noAction: "SEND QUERY: Rate severity / degree", hint: "Look for a pain rating (1-10) or words like 'mild', 'moderate', or 'severe'." },
@@ -318,12 +325,12 @@
                 { id: 'q11', group: 'C. ADMITTING DIAGNOSIS', text: "Admitting diagnosis is specific", noAction: "SEND QUERY: Make diagnosis specific", hint: "Look at the Admitting Diagnosis. Is it detailed? (e.g., 'Acute Appendicitis' instead of just 'Abdominal Pain')." },
                 { id: 'q12', group: 'C. ADMITTING DIAGNOSIS', text: "Diagnosis matches CC/HPI", noAction: "SEND QUERY: Reconcile Dx with CC/HPI", hint: "Does the doctor's diagnosis make sense based on what the patient complained about?" },
                 { id: 'q13', group: 'C. ADMITTING DIAGNOSIS', text: "Severity is reflected in diagnosis", noAction: "SEND QUERY: Add severity to Dx", hint: "Look for words like 'Severe', 'Acute', or 'Chronic' written in the final diagnosis." },
-                { id: 'q14', group: 'C. ADMITTING DIAGNOSIS', text: "Co-morbidity included if any", noAction: "SEND QUERY: List co-morbidities", hint: "Are other long-term illnesses the patient has also listed? (e.g., 'Hypertension', 'Diabetes')." },
-                { id: 'q15', group: 'C. ADMITTING DIAGNOSIS', text: "Diagnosis has etiology if known", noAction: "SEND QUERY: State etiology if known", hint: "Is the cause of the disease mentioned? (e.g., 'due to bacterial infection')." },
+                { id: 'q14', group: 'C. ADMITTING DIAGNOSIS', text: "Co-morbidity included if any", noAction: "SEND QUERY: List co-morbidities", hint: "Are other long-term illnesses the patient has also listed? (e.g., 'Hypertension', 'Diabetes').", isPro: true },
+                { id: 'q15', group: 'C. ADMITTING DIAGNOSIS', text: "Diagnosis has etiology if known", noAction: "SEND QUERY: State etiology if known", hint: "Is the cause of the disease mentioned? (e.g., 'due to bacterial infection').", isPro: true },
                 { id: 'q16', group: 'D. MEDICAL NECESSITY', text: "Vital signs abnormal on admission", noAction: "RTH RISK: Justify admission vs OPD", hint: "Check the Admission Vital Signs. Are blood pressure, heart rate, or temperature too high/low?" },
-                { id: 'q17', group: 'D. MEDICAL NECESSITY', text: "Abnormal labs done on admission", noAction: "SEND QUERY: Attach abnormal labs", hint: "Check Lab Results. Are there any values marked with 'H' (High) or 'L' (Low)?" },
-                { id: 'q18', group: 'D. MEDICAL NECESSITY', text: "Treatment requires hospitalization", noAction: "RTH RISK: Why not OPD care?", hint: "Look for a medical plan that requires IV meds, surgery, or constant monitoring that can't be done at home." },
-                { id: 'q19', group: 'D. MEDICAL NECESSITY', text: "Risk of deterioration documented", noAction: "SEND QUERY: Document risk of deterioration", hint: "Did the doctor write anywhere that the patient might get worse if not admitted?" },
+                { id: 'q17', group: 'D. MEDICAL NECESSITY', text: "Abnormal labs done on admission", noAction: "SEND QUERY: Attach abnormal labs", hint: "Check Lab Results. Are there any values marked with 'H' (High) or 'L' (Low)?", isPro: true },
+                { id: 'q18', group: 'D. MEDICAL NECESSITY', text: "Treatment requires hospitalization", noAction: "RTH RISK: Why not OPD care?", hint: "Look for a medical plan that requires IV meds, surgery, or constant monitoring that can't be done at home.", isPro: true },
+                { id: 'q19', group: 'D. MEDICAL NECESSITY', text: "Risk of deterioration documented", noAction: "SEND QUERY: Document risk of deterioration", hint: "Did the doctor write anywhere that the patient might get worse if not admitted?", isPro: true },
                 { id: 'q20', group: 'D. MEDICAL NECESSITY', text: "Reason why OPD care is not enough", noAction: "RTH RISK: Explain why not OPD case", hint: "Look for a clear statement on why the patient couldn't just be sent home with pills." }
             ];
 
@@ -345,23 +352,28 @@
                         groupRow.innerHTML = `<td colspan="5" class="px-4 py-1.5 whitespace-normal">${currentGroup}</td>`;
                         tbody.appendChild(groupRow);
                     }
+                    
+                    // Highlight the Professional Healthcare Worker items
+                    const proBadge = item.isPro ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-sm whitespace-nowrap"><i class="fa-solid fa-user-doctor mr-1"></i> ROD / Nurse</span>` : '';
+                    const rowBgClass = item.isPro ? "bg-indigo-50/40 hover:bg-indigo-50" : "hover:bg-slate-50";
+
                     const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.className = `${rowBgClass} transition-colors border-b border-slate-100`;
                     tr.innerHTML = `
-                        <td class="px-2 sm:px-3 py-2 text-center text-slate-500 font-medium align-top">${index + 1}</td>
-                        <td class="px-2 sm:px-4 py-2 text-slate-800 whitespace-normal leading-snug align-top">
-                            <div class="font-medium">${item.text}</div>
-                            <div class="text-[11px] leading-tight text-slate-500 mt-1 italic"><i class="fa-solid fa-circle-info mr-1 text-blue-400"></i>${item.hint}</div>
+                        <td class="px-2 sm:px-3 py-3 text-center text-slate-500 font-medium align-top">${index + 1}</td>
+                        <td class="px-2 sm:px-4 py-3 text-slate-800 whitespace-normal leading-snug align-top">
+                            <div class="font-medium flex items-center flex-wrap gap-y-1">${item.text} ${proBadge}</div>
+                            <div class="text-[11px] leading-tight text-slate-500 mt-1.5 italic"><i class="fa-solid fa-circle-info mr-1 text-blue-400"></i>${item.hint}</div>
                         </td>
-                        <td class="px-2 sm:px-4 py-2 text-center align-top">
-                            <select id="${item.id}" class="audit-select w-full rounded border-slate-300 text-sm p-1 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm" onchange="window.calculateScore()">
+                        <td class="px-2 sm:px-4 py-3 text-center align-top">
+                            <select id="${item.id}" class="audit-select w-full rounded border-slate-300 text-sm p-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm" onchange="window.calculateScore()">
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                                 <option value="N/A" selected>N/A</option>
                             </select>
                         </td>
-                        <td class="px-2 sm:px-4 py-2 text-center font-mono font-bold text-slate-700 align-top" id="score_${item.id}">0</td>
-                        <td class="px-2 sm:px-4 py-2 text-xs text-red-600 font-medium whitespace-normal leading-tight align-top" id="action_${item.id}"></td>
+                        <td class="px-2 sm:px-4 py-3 text-center font-mono font-bold text-slate-700 align-top" id="score_${item.id}">0</td>
+                        <td class="px-2 sm:px-4 py-3 text-xs text-red-600 font-medium whitespace-normal leading-tight align-top" id="action_${item.id}"></td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -596,7 +608,6 @@
                 window.showToast("Detailed report generated successfully!", "success");
             };
 
-
             window.showToast = function(message, type = 'success') {
                 const toast = document.createElement('div');
                 const icon = type === 'success' ? 'fa-check-circle text-green-500' : 'fa-circle-exclamation text-red-500';
@@ -696,14 +707,21 @@
                             if (audit.result === 'QUERY NEEDED') badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
                             if (audit.result === 'RTH RISK') badgeClass = 'bg-red-100 text-red-800 border-red-300';
 
+                            // Fallback calculation in case database score is 0 or missing
+                            let calculatedFallbackScore = 0;
                             let failedQuestions = [];
                             if (audit.checklist) {
                                 Object.keys(audit.checklist).forEach(key => {
                                     if (audit.checklist[key] === 'No') {
                                         failedQuestions.push(key.replace('q', '#'));
+                                    } else if (audit.checklist[key] === 'Yes') {
+                                        calculatedFallbackScore++;
                                     }
                                 });
                             }
+                            
+                            // Use database score if available and valid, otherwise use the recalculated one
+                            const displayScore = (audit.score && audit.score > 0) ? audit.score : calculatedFallbackScore;
                             
                             let noCountDisplay = failedQuestions.length > 0 
                                 ? `<div class="font-bold text-lg text-red-600">${failedQuestions.length}</div><div class="text-xs text-red-500 whitespace-normal max-w-[120px] mx-auto leading-tight mt-1">${failedQuestions.join(', ')}</div>`
@@ -712,13 +730,16 @@
                             tr.innerHTML = `
                                 <td class="px-4 py-3 align-middle whitespace-normal min-w-[150px]"><div class="font-bold text-slate-800">${escapeHtml(audit.patientName)}</div><div class="text-xs text-slate-500">Age: ${audit.age}</div></td>
                                 <td class="px-4 py-3 align-middle text-sm text-slate-700">${admDate}</td>
-                                <td class="px-4 py-3 align-middle text-center"><span class="font-bold text-lg">${audit.score}</span><span class="text-xs text-slate-500">/20</span></td>
+                                <td class="px-4 py-3 align-middle text-center"><span class="font-bold text-lg">${displayScore}</span><span class="text-xs text-slate-500">/20</span></td>
                                 <td class="px-4 py-3 align-middle text-center">${noCountDisplay}</td>
                                 <td class="px-4 py-3 align-middle whitespace-normal"><span class="px-2 py-1 rounded border text-xs font-bold ${badgeClass}">${audit.result}</span></td>
                                 <td class="px-4 py-3 align-middle text-right">
                                     <div class="flex items-center justify-end gap-1">
                                         <button onclick="window.openReviewModal('${audit.id}')" class="text-blue-500 hover:text-blue-700 transition-colors p-2 rounded-full hover:bg-blue-50 border border-transparent hover:border-blue-200" title="Review Audit Details">
                                             <i class="fa-solid fa-eye text-lg"></i>
+                                        </button>
+                                        <button onclick="window.editLiveRecord('${audit.id}')" class="text-emerald-500 hover:text-emerald-700 transition-colors p-2 rounded-full hover:bg-emerald-50 border border-transparent hover:border-emerald-200" title="Edit Record">
+                                            <i class="fa-solid fa-pencil text-lg"></i>
                                         </button>
                                         <button onclick="window.deleteLiveRecord('${audit.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50 border border-transparent hover:border-red-200" title="Delete from live sheet">
                                             <i class="fa-solid fa-trash-can text-lg"></i>
@@ -739,11 +760,6 @@
             };
 
             window.deleteLiveRecord = async (id) => {
-                // Using a custom modal approach would be better, but sticking to standard browser for simplicity as requested, 
-                // Wait, rules state: "Never use alert() or confirm()". Replacing with direct action or a non-blocking UI is required.
-                // Since I cannot use confirm(), I will execute the delete directly but show a toast. 
-                // To prevent accidental clicks, I'll change the button UI temporarily.
-                
                 try {
                     const res = await fetch(GOOGLE_WEB_APP_URL, {
                         method: 'POST',
@@ -762,10 +778,90 @@
                 }
             };
 
+            // NEW: Edit Record Functionality
+            window.editLiveRecord = (id) => {
+                const audit = liveAudits.find(a => a.id === id);
+                if (!audit) return;
+
+                editingId = id;
+                
+                // Populate Demographics
+                document.getElementById('patientName').value = audit.patientName || '';
+                document.getElementById('age').value = audit.age || '';
+                document.getElementById('dateAdmission').value = audit.dateAdmission || '';
+                document.getElementById('chiefComplaint').value = audit.chiefComplaint || '';
+                document.getElementById('admittingDiagnosis').value = audit.admittingDiagnosis || '';
+                document.getElementById('finalDiagnosis').value = audit.finalDiagnosis || '';
+                document.getElementById('dateDischarge').value = audit.dateDischarge || '';
+                
+                // Populate Checklist
+                if (audit.checklist) {
+                    Object.keys(audit.checklist).forEach(key => {
+                        const selectEl = document.getElementById(key);
+                        if(selectEl) selectEl.value = audit.checklist[key];
+                    });
+                }
+                
+                // Populate ROS
+                // Clear existing checks first
+                document.querySelectorAll('.ros-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    window.toggleRosNote(cb.id.split('_')[1]);
+                });
+                if (audit.ros && audit.ros.length > 0) {
+                    audit.ros.forEach(r => {
+                        const cb = Array.from(document.querySelectorAll('.ros-checkbox')).find(c => c.value === r.system);
+                        if (cb) {
+                            cb.checked = true;
+                            const index = cb.id.split('_')[1];
+                            window.toggleRosNote(index);
+                            document.getElementById(`ros_note_${index}`).value = r.note || '';
+                        }
+                    });
+                }
+
+                // Populate Histories & Summary
+                document.getElementById('pastHistory').value = audit.pastHistory || '';
+                document.getElementById('familyHistory').value = audit.familyHistory || '';
+                document.getElementById('socialHistory').value = audit.socialHistory || '';
+                document.getElementById('summary').value = audit.summary || '';
+
+                // Update UI state to "Edit Mode"
+                window.calculateScore();
+                formHeaderTitle.innerHTML = `<i class="fa-solid fa-pencil text-emerald-600 mr-2"></i>Edit Audit: ${escapeHtml(audit.patientName)}`;
+                submitBtn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Update Audit';
+                submitBtn.classList.replace('bg-blue-800', 'bg-emerald-700');
+                submitBtn.classList.replace('hover:bg-blue-900', 'hover:bg-emerald-800');
+                cancelEditBtn.classList.remove('hidden');
+
+                window.showToast("Record loaded for editing.", "success");
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            };
+
+            // NEW: Cancel Edit Functionality
+            window.cancelEdit = () => {
+                editingId = null;
+                document.getElementById('auditForm').reset();
+                document.getElementById('dateAdmission').valueAsDate = new Date();
+                
+                document.querySelectorAll('.audit-select').forEach(sel => sel.value = 'N/A');
+                document.querySelectorAll('.ros-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    window.toggleRosNote(cb.id.split('_')[1]);
+                });
+                
+                window.calculateScore();
+                
+                formHeaderTitle.innerHTML = `<i class="fa-solid fa-file-medical text-blue-600 mr-2"></i>New Comprehensive CDI Audit`;
+                submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Audit to Live Database';
+                submitBtn.classList.replace('bg-emerald-700', 'bg-blue-800');
+                submitBtn.classList.replace('hover:bg-emerald-800', 'hover:bg-blue-900');
+                cancelEditBtn.classList.add('hidden');
+            };
+
             document.getElementById('auditForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const generatedActions = window.calculateScore(); 
-                const submitBtn = document.getElementById('submitBtn');
                 const originalBtnHtml = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Syncing to Database...';
                 submitBtn.disabled = true;
@@ -781,7 +877,8 @@
                 checklistData.forEach(item => { checklistAnswers[item.id] = document.getElementById(item.id).value; });
 
                 const auditData = {
-                    id: 'ID_' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                    action: editingId ? "update" : "create", // Inform backend if it's an update
+                    id: editingId || 'ID_' + Math.random().toString(36).substr(2, 9).toUpperCase(),
                     patientName: document.getElementById('patientName').value.trim(),
                     age: parseInt(document.getElementById('age').value),
                     dateAdmission: document.getElementById('dateAdmission').value,
@@ -809,13 +906,8 @@
                     
                     const result = await res.json();
                     if (result.status === 'success') {
-                        window.showToast("Audit securely saved to Google Sheets!");
-                        e.target.reset();
-                        document.querySelectorAll('.audit-select').forEach(sel => sel.value = 'N/A');
-                        document.querySelectorAll('textarea[id^="ros_note_"]').forEach(ta => { ta.classList.add('hidden'); ta.value = ''; });
-                        window.calculateScore(); // reset detailed view
-                        document.getElementById('dateAdmission').valueAsDate = new Date();
-                        
+                        window.showToast(editingId ? "Audit securely updated!" : "Audit securely saved to Google Sheets!");
+                        window.cancelEdit(); // Reset form & UI
                         window.fetchLiveAudits(); 
                     } else {
                         throw new Error(result.message);
@@ -849,10 +941,19 @@
             window.openReviewModal = (id) => {
                 const audit = liveAudits.find(a => a.id === id);
                 if (!audit) return;
+                
+                // Calculate fallback score if missing here as well
+                let calculatedFallbackScore = 0;
+                if (audit.checklist) {
+                    Object.keys(audit.checklist).forEach(key => {
+                        if (audit.checklist[key] === 'Yes') calculatedFallbackScore++;
+                    });
+                }
+                const displayScore = (audit.score && audit.score > 0) ? audit.score : calculatedFallbackScore;
 
                 document.getElementById('revPatient').textContent = escapeHtml(audit.patientName);
                 document.getElementById('revAdm').textContent = audit.dateAdmission ? new Date(audit.dateAdmission).toLocaleDateString() : 'N/A';
-                document.getElementById('revScore').textContent = audit.score + '/20';
+                document.getElementById('revScore').textContent = displayScore + '/20';
                 
                 const resBadge = document.getElementById('revResult');
                 resBadge.textContent = audit.result;
